@@ -1,0 +1,733 @@
+---
+title: "Processamento de um inventário florestal utilizando funções de afilamento"
+author: Gabriel de Freitas Pereira
+author-title: Autor
+number-sections: true
+highlight-style: pygments
+format:
+  html:
+    theme: lux
+    code-fold: true
+    code-summary: "Mostrar código"
+    toc: true
+    toc-location: left
+    toc-title: Sumário
+    number-sections: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+library( cmrinvflor )
+library( openxlsx )
+library( timbeR )
+library( dplyr )
+library( minpack.lm )
+```
+
+# Introdução
+
+Um inventário florestal é uma prática que busca a quantificação, e por
+conseguinte, a qualificação das florestas em diferentes aspectos, como a
+produção de madeira entre outros possíveis produtos, através do uso de
+técnicas estatísticas de amostragem. Sendo assim, o inventário visa obter o
+máximo de informações de uma floresta com a máxima precisão e o mínimo
+custo. Esses três fatores desempenham papel importante no planejamento de
+um inventário florestal (JÚNIOR et al., 2020).
+
+
+# Objetivo
+
+Realizar o inventário florestal de um povoamento com um cultivar de *Eucalyptus grandis*
+W. Hill ex Maiden x *Eucalyptus urophylla* S. T. Blake na região noroeste do Estado de Minas Gerais, para a estimar a produção madeireira 
+dos seguintes produtos de forma independente:
+
+1. PRODUTO 1: diâmetro mínimo de 5, 5cm sem casca e comprimento de tora de 5, 6m.
+
+2. PRODUTO 2: diâmetro mínimo de 7, 5cm com casca e comprimento de tora de 3, 3m.
+
+3. VOLUME TOTAL COM CASCA.
+
+
+# Explorando dados da cubagem
+
+
+```{r, include = TRUE}
+arv <- read.csv2( "cubagem.csv" )
+arv$dap <- arv$cap / pi
+arv$disc <- arv$dicc - ( 2 * arv$espcasca )
+
+par( mfrow = c( 1, 2 ),
+     pch = 20,
+     bg = "#171717",
+     col.axis = "white",
+     col.lab = "white",
+     col.main = "white",
+     fg = "white" ) 
+with( arv, plot( hi/ht, dicc, pch = 20 ) )
+with( arv, plot( hi, dicc, pch = 20 ) )
+```
+
+::: column-margin
+Figura 1. Relação altura com o diâmetro com casca
+:::
+
+# Ajustes e predições dos modelos
+
+Quatro modelos foram ajustados considerando:
+
+$\beta_1,\beta_2 ...,\beta_n$ = parâmetros do modelo;
+
+$h_i$ = altura até seção `i` do fuste;
+
+$d_i$ = diâmetro na seção `i` do fuste;
+
+$d$ = diâmetro à altura do peito;
+
+$h$ = altura da árvore.
+
+$p$ = primeiro ponto de inflexão calculado no modelo segmentado de Max & Burkhart (1976).
+
+A partir disso foram feitas as estimativas dos diâmetros sem casca e com casca para cada modelo. 
+
+
+## Ajuste Polinômio do 5º grau
+
+![](eq_5grau.PNG)
+
+::: column-margin
+Função de Schöepfer (1966)
+:::
+
+```{r}
+#' #### Ajuste com casca
+
+#' ##### Ajuste linear
+arv$hih <- arv$hi / arv$ht
+arv$did <- arv$dicc / arv$dap
+
+ajlin <- lm( did ~ hih + I( hih^2 ) + I( hih^3 )  + I( hih^4 ) + I( hih^5 ), arv )
+
+#' ##### Erro padrão residual
+syx <- summary( ajlin )$sigma
+syxperc <- syx/mean( arv$dicc ) * 100 * mean( arv$dap )
+
+#' ##### RMSE 
+arv$diccest5grau <- predict( ajlin ) * arv$dap
+RMSE_kozcc <- arv %>% 
+  summarise( RMSE = sqrt( sum ( ( diccest5grau - dicc )^2 ) / mean( diccest5grau ) ) ) %>% 
+  pull( RMSE ) %>% 
+  round( 2 )
+
+#' #### Ajuste sem casca 
+
+#' ##### Ajuste linear
+arv$didsc <- arv$disc / arv$dap
+
+ajlinsc <- lm( didsc ~ hih + I( hih^2 ) + I( hih^3 )  + I( hih^4 ) + I( hih^5 ), arv )
+
+#' ##### Erro padrão residual
+syxsc <- summary( ajlinsc )$sigma
+syxpercsc <- syxsc/mean( arv$disc ) * 100 * mean( arv$dap )
+
+#' ##### RMSE 
+arv$discest5grau <- predict( ajlinsc ) * arv$dap
+RMSE_kozsc <- arv %>% 
+  summarise( RMSE = sqrt( sum ( ( discest5grau - disc )^2 ) / mean( discest5grau ) ) ) %>% 
+  pull( RMSE ) %>% 
+  round( 2 )
+
+```
+
+## Ajuste Bi
+
+![](eq_BI2000.PNG)
+
+::: column-margin
+Função trigonométrica de forma variável de Bi (2000). 
+:::
+
+```{r}
+
+#' #### Ajuste com casca
+
+#' ##### Ajuste não linear
+
+arv$hih <- arv$hi / arv$ht
+bi <-  nlsLM( dicc ~ taper_bi( dap, ht, hih, b0, b1, b2, b3, b4, b5, b6 ),
+              data = arv,
+              start = list( b0 = 1.8, 
+                            b1 = -0.2, 
+                            b2 = -0.04, 
+                            b3 = -0.9, 
+                            b4 = -0.0006, 
+                            b5 = 0.07, 
+                            b6 = -0.14 ) )
+
+#' ##### Erro padrão residual
+bisyx <- summary( bi )$sigma
+bisyxperc <- bisyx/mean( arv$dicc ) * 100
+
+#' ##### RMSE 
+arv$diccestbi <- predict( bi )
+RMSE_bi <- arv %>% 
+  summarise( RMSE = sqrt( sum ( ( diccestbi - dicc )^2 ) / mean( diccestbi ) ) ) %>% 
+  pull( RMSE ) %>% 
+  round( 2 )
+
+#' #### Ajuste sem casca 
+
+#' ##### Ajuste não linear
+bisc <- nlsLM( disc ~ taper_bi( dap, ht, hih, b0, b1, b2, b3, b4, b5, b6 ),
+              data = arv,
+              start = list( b0 = 1.8, 
+                            b1 = -0.2, 
+                            b2 = -0.04, 
+                            b3 = -0.9, 
+                            b4 = -0.0006, 
+                            b5 = 0.07, 
+                            b6 = -0.14 ) )
+
+#' ##### Erro padrão residual
+bisyxsc <- summary( bisc )$sigma
+bisyxpercsc <- bisyxsc/mean( arv$disc ) * 100
+
+#' ##### RMSE 
+arv$discestbi <- predict( bisc )
+RMSE_bisc <- arv %>% 
+  summarise( RMSE = sqrt( sum ( ( discestbi - disc )^2 ) / mean( discestbi ) ) ) %>% 
+  pull( RMSE ) %>% 
+  round( 2 )
+
+```
+
+## Ajuste Kozak
+
+![](eq_Kozak2004.PNG)
+
+::: column-margin
+Função de Kozak (2004)
+:::
+
+```{r}
+#' #### Ajuste com casca
+
+#' ##### Ajuste não linear
+kozak <- nlsLM( dicc ~ taper_kozak( dap, ht, hih, b0, b1, b2, b3, b4, b5, b6, b7, b8, p ),
+               start = list( b0 = 1.00, b1 = 0.97, b2 = 0.03, b3 = 0.49, b4 = -0.87, b5 = 0.50, b6 = 3.88, b7 = 0.03, b8 = -0.19, p = 0.1 ),
+               data = arv,
+               control = nls.lm.control( maxiter = 1000, maxfev = 2000 )
+)
+
+#' ##### Erro padrão residual
+kosyx <- summary( kozak )$sigma
+kosyxperc <- kosyx/mean( arv$dicc ) * 100
+
+#' ##### RMSE 
+arv$diccestkoz <- predict( kozak )
+RMSE_kozcc <- arv %>% 
+  summarise( RMSE = sqrt( sum ( ( diccestkoz - dicc )^2 ) / mean( diccestkoz ) ) ) %>% 
+  pull( RMSE ) %>% 
+  round( 2 )
+
+
+#' #### Ajuste sem casca
+
+#' ##### Ajuste não linear
+kozaksc <- nlsLM( disc ~ taper_kozak( dap, ht, hih, b0, b1, b2, b3, b4, b5, b6, b7, b8, p ),
+               start = list( b0 = 1.00, b1 = 0.97, b2 = 0.03, b3 = 0.49, b4 = -0.87, b5 = 0.50, b6 = 3.88, b7 = 0.03, b8 = -0.19, p = 0.1 ),
+               data = arv,
+               control = nls.lm.control( maxiter = 1000, maxfev = 2000 )
+)
+
+#' ##### Erro padrão residual
+kosyxsc <- summary( kozaksc )$sigma
+kosyxpercsc <- kosyxsc/mean( arv$disc ) * 100
+
+#' ##### RMSE 
+arv$discestkoz <- predict( kozaksc )
+RMSE_kozsc <- arv %>% 
+  summarise( RMSE = sqrt( sum ( ( discestkoz - disc )^2 ) / mean( discestkoz ) ) ) %>% 
+  pull( RMSE ) %>% 
+  round( 2 )
+
+```
+
+## Ajuste Ormerod
+
+![](eq_ormerod.PNG)
+
+::: column-margin
+Função de Ormerod (1973)
+:::
+
+```{r}
+#' #### Ajuste com casca
+
+#' ##### Ajuste não linear
+ormerod <- nls("dicc~dap*((ht-hi)/(ht-1.3))^b1",
+               arv,
+               start = list( b1 = 0.1 ) )
+
+#' ##### Erro padrão residual
+orsyx <- summary( ormerod )$sigma
+orsyxperc <- orsyx/mean( arv$dicc ) * 100
+
+#' ##### RMSE 
+arv$diccestorm <- predict( ormerod )
+RMSE_ormcc <- arv %>% 
+  summarise( RMSE = sqrt( sum ( ( diccestorm - dicc )^2 ) / mean( diccestorm ) ) ) %>% 
+  pull( RMSE ) %>% 
+  round( 2 )
+
+#' #### Ajuste sem casca
+ormerodsc <- nls("disc~dap*((ht-hi)/(ht-1.3))^b1",
+                 arv,
+                 start = list( b1 = 0.1 ) )
+
+#' ##### Erro padrão residual
+orsyxsc <- summary( ormerodsc )$sigma
+orsyxpercsc <- orsyxsc/mean( arv$disc ) * 100
+
+#' ##### RMSE 
+arv$discestorm <- predict( ormerodsc )
+RMSE_ormsc <- arv %>% 
+  summarise( RMSE = sqrt( sum ( ( discestorm - disc )^2 ) / mean( discestorm ) ) ) %>% 
+  pull( RMSE ) %>% 
+  round( 2 )
+
+```
+
+# Análise dos modelos
+
+## Erro padrão residual
+
++---------------------+------------------------+-----------------------+
+| Modelos             | Erro Padrão Residual   | Erro Padrão Residual  |
+|                     | (% com casca)          | (% sem casca)         |
++=====================+========================+=======================+
+| Schöepfer (1966)    | 5.171111               | 5.215619              |
++---------------------+------------------------+-----------------------+
+| Bi (2000)           | 4.239943               | 6.557174              |
++---------------------+------------------------+-----------------------+
+| Kozak (2004)        | 4.238015               | 4.393806              |
++---------------------+------------------------+-----------------------+
+| Ormerod (1973)      | 6.655004               | 7.410827              |
++---------------------+------------------------+-----------------------+
+
+: Erro padrão residual dos modelos testados
+
+::: column-margin
+Tabela 1.
+:::
+
+Quanto menor o erro padrão residual mais distante do ideal o modelo se encontra, ou seja, os resíduos estão mais distantes do valor real. Desse modo, comparando os modelos de forma **isolada a partir dessa métrica estatística** os modelos de Kozak e Bi obtiveram os melhores resultados para as estimativas de diâmetro com casca. Já para as estimativas de diâmetro sem casca, o modelo de Kozak foi o melhor. No entanto, vale ressaltar que uma métrica não é suficiente para escolhermos o melhor modelo de acordo com a nossa base, é necessário analisarmos outros fatores, que serão discutidos nesse relatório. 
+
+## Raiz do erro quadrático médio
+
++---------------------+------------------------+-----------------------+
+| Modelos             |    RMSE (com casca)    |    RMSE (sem casca)   |
++=====================+========================+=======================+
+| Schöepfer (1966)    | 8.51                   | 8.18                  |
++---------------------+------------------------+-----------------------+
+| Bi (2000)           | 7.49                   | 11.05                 |
++---------------------+------------------------+-----------------------+
+| Kozak (2004)        | 7.47                   | 7.47                  |
++---------------------+------------------------+-----------------------+
+| Ormerod (1973)      | 11.84                  | 12.47                 |
++---------------------+------------------------+-----------------------+
+
+: Raiz do erro quadrático médio dos modelos testados
+
+::: column-margin
+Tabela 2.
+:::
+
+A raiz quadrada do erro médio, RMSE (**Root Mean Squared Error**)
+é a raiz quadrada do erro médio, que nos auxilia a verificar a acurácia dos modelos, penalizando erros maiores, ou seja, é uma métrica mais sensível aos erros devido ao processo de quadratura que a produziu. Sendo assim, analisando os resultados dessa métrica quanto maior o RMSE pior será o modelo, logo, os modelos de Kozak e Bi novamente foram os melhores para as estimativas dos diâmetros com casca. E para as estimativas dos diâmetros sem casca, o modelo de Kozak também foi o melhor, se destacando entre os modelos testados para duas métricas estatísticas.
+
+## Análise Gráfica
+
+```{r}
+## Resíduos
+
+#' ##### 5° grau
+arv$res5grau <- residuals( ajlin ) * arv$dap
+arv$res5grausc <- residuals( ajlinsc ) * arv$dap
+
+#' ##### methol
+arv$resbi <- residuals( bi )
+arv$resbisc <- residuals( bisc )
+
+#' ##### kozak
+arv$reskoz <- residuals( kozak )
+arv$reskozsc <- residuals( kozaksc )
+
+#' ##### ormerod
+arv$resorm <- residuals( ormerod )
+arv$resormsc <- residuals( ormerodsc )
+
+par( mfrow = c( 2, 2 ),
+     pch = 20,
+     bg = "#171717",
+     col.axis = "white",
+     col.lab = "white",
+     col.main = "white",
+     fg = "white" ) 
+
+fBasics::qqnormPlot( ( arv$res5grausc ), title = FALSE, main = "Schöepfer" )
+fBasics::qqnormPlot( ( arv$resbisc ), title = FALSE, main = "Bi" )
+fBasics::qqnormPlot( ( arv$reskozsc ), title = FALSE, main = "Kozak" )
+fBasics::qqnormPlot( ( arv$resormsc ), title = FALSE, main = "Ormerod" )
+```
+
+::: column-margin
+Figura 2. Gráfico de quantis de todos modelos testados - Diâmetros com
+casca.
+:::
+
+```{r}
+par( mfrow = c( 2, 2 ),
+pch = 20,
+bg = "#171717",
+col.axis = "white",
+col.lab = "white",
+col.main = "white",
+fg = "white" ) 
+
+graficos_res <- function( hi, res, modelo, xlab = "hi(m)" ) {
+  plot( hi, res, 
+        pch = 20, 
+        ylim = c( -5, 5 ),
+        ylab = "Resíduo (m³)", 
+        main = modelo )
+  abline( h = 0, col = "red" )
+}
+
+graficos_res( arv$hi, arv$res5grau, "Schöepfer" )
+graficos_res( arv$hi, arv$resbi, "Bi" )
+graficos_res( arv$hi, arv$reskoz, "Kozak" )
+graficos_res( arv$hi, arv$resorm, "Ormerod" )
+```
+
+::: column-margin
+Figura 3. Gráfico de resíduos de todos modelos testados - Diâmetros com
+casca.
+:::
+
+Quando analisados os gráficos de resíduos (Figura 3) e os gráficos de
+normalidade dos resíduos QQ-plot (Figura 2), foi possível notar que os melhores modelos que apresentaram distribuições mais agrupadas em torno do zero, foram os modelos de Kozak e Bi. Sendo o modelo de Kozak aparentemente mais próximo do ideal nas ponteiras das árvores. Já os demais modelos apresentaram erros maiores (mais distantes de zero), principalmente na base das árvores.
+
+
+```{r}
+par( mfrow = c( 2, 2 ),
+pch = 20,
+bg = "#171717",
+col.axis = "white",
+col.lab = "white",
+col.main = "white",
+fg = "white" ) 
+
+fBasics::qqnormPlot((arv$res5grausc),title = FALSE, main = "Schöepfer")
+fBasics::qqnormPlot((arv$resbisc),title = FALSE, main = "Bi")
+fBasics::qqnormPlot((arv$reskozsc),title = FALSE, main = "Kozak")
+fBasics::qqnormPlot((arv$resormsc),title = FALSE, main = "Ormerod")
+```
+
+::: column-margin
+Figura 4. Gráfico de quantis de todos modelos testados - Diâmetros sem
+casca.
+:::
+
+```{r}
+par( mfrow = c( 2, 2 ),
+pch = 20,
+bg = "#171717",
+col.axis = "white",
+col.lab = "white",
+col.main = "white",
+fg = "white" ) 
+
+graficos_res( arv$hi, arv$res5grausc, "Schöepfer" )
+graficos_res( arv$hi, arv$resbisc, "Bi" )
+graficos_res( arv$hi, arv$reskozsc, "Kozak" )
+graficos_res( arv$hi, arv$resormsc, "Ormerod" )
+```
+
+::: column-margin
+Figura 5. Gráfico de resíduos de todos modelos testados - Diâmetros sem
+casca.
+:::
+
+A partir da Figura 4, a qual representa o gráfico de quantis é possível observar que os resíduos  afirmam a normalidade. Além disso, com a análise dos gráficos de resíduos dispostos na Figura 3, foi possível notar que o melhor modelo, o qual apresentou a melhor dispersão de resíduos devido às suas distribuições serem mais agrupadas em torno do zero, foi o modelo de Kozak. Sendo os modelos de Kozak e Schöepfer, aparentemente mais próximos do ideal, tanto na base quanto nas ponteiras das árvores, quando comparado com os demais. Sendo assim, os demais modelos apresentaram erros maiores (mais distantes de zero), principalmente na base das árvores.
+
+
+# Cálculo dos produtos para produção madeireira
+
+```{r}
+# coeficientes para obtenção dos volumes
+coef_kozak <- coef( kozak )
+coef_kozaksc <- coef( kozaksc )
+
+###### volume produto com casca  --------------------------------------------------------------------
+
+# A tabela de sortimentos deve conter cinco colunas, que podem ter qualquer nome, mas devem estar na seguinte ordem: 
+#diâmetro da tora na ponta fina, em centímetros; 
+#comprimento mínimo da tora (líquido), em metros; comprimento máximo da tora (líquido), em metros; 
+#e a perda resultante do traçamento de cada tora, em centímetros. Um ponto de atenção é que as linhas da tabela representam os produtos da madeira, e estes devem estar ordenados do mais valioso para o menos valioso, de modo que o algoritmo de extração de toras priorize aos produtos de maior valor comercial.
+
+# afilamento usando timbeR::poly5_logs
+fustes <- read.csv2( "fustes.csv" )
+
+sortimentoscc <- data.frame(
+  NAME = c( "cc" ),
+  SED = c( 7.5 ),
+  min = c( 2 ),
+  max = c( 3.3 ),
+  LOSS = c( 10 )
+)
+
+# testando para produtos com casca
+vticc <- mapply( kozak_logs,
+                 dbh = fustes$cap/pi,
+                 h = fustes$htre,
+                 MoreArgs = list(
+                   coef = coef_kozak[ -10 ],
+                   p = coef_kozak[ 10 ],
+                   assortments = sortimentoscc,
+                   total_volume = TRUE,
+                   only_vol = TRUE ) )
+
+vticc <- t( vticc )
+vticc <- as.data.frame( vticc )
+vticc$cc <- as.numeric( vticc$cc )
+vticc$Total <- as.numeric( vticc$Total )
+
+
+###### volume produto sem casca --------------------------------------------------------------------
+
+sortimentos <- data.frame(
+  NAME = c( "sc" ),
+  SED = c( 5.5 ),
+  min = c( 2 ),
+  max = c( 5.6 ),
+  LOSS = c( 10 )
+)
+
+# testando para produtos sem casca
+vtisc <- mapply( kozak_logs,
+                 dbh = fustes$cap/pi,
+                 h = fustes$htre,
+                 MoreArgs = list(
+                   coef = coef_kozaksc[ -10 ],
+                   p = coef_kozaksc[ 10 ],
+                   assortments = sortimentos,
+                   total_volume = TRUE,
+                   only_vol = TRUE ) )
+
+vtisc <- t( vtisc )
+vtisc <- as.data.frame( vtisc )
+vtisc$sc <- as.numeric( vtisc$sc )
+
+###### Juntando resultados para fazer inventário de cada sortimento.
+fustes <- read.csv2( "fustes.csv" )
+
+fustes$vprodisc <- vtisc$sc
+fustes$vprodicc <- vticc$cc
+fustes$vti <- vticc$Total
+```
+
+## (a) Erro percentual amostral e intervalo de confiança do volume do produto 1 (sem casca) para a população.
+
+```{r}
+##### produto 1  --------------------------------------------------------------------
+
+parcela <- aggregate(list( vprod1 = fustes$vprodisc ),
+                     list( talhao = fustes$talhao, parcela = fustes$parcela ), sum )
+
+#[m³/parcela]  
+media <- mean(parcela$vprod1)
+ 
+
+# area da parcela  
+areaparc <- mean(((fustes$raio^2)*pi))
+
+# m³/parc para m³/ha.
+parcela$vprod1_ha<-parcela$vprod1*10000/areaparc
+
+# para calcular o volume medio m³/ha  
+vmed <- mean(parcela$vprod1_ha)  
+# variancia do volume m6/ha  
+vvar <- var(parcela$vprod1_ha)  
+# desvio padrao do volume m³/ha 
+vdesv <- sd(parcela$vprod1_ha)  
+
+n <- length(parcela$vprod1_ha)  
+
+talhao <- subset(fustes, duplicated( talhao ) == F,
+                 c( "talhao", "area") )
+#area da fazenda em ha
+area_fazenda <- sum(talhao$area)
+
+#numero de parcelas que cabem na fazenda 
+N <- area_fazenda * 10000/areaparc  
+
+erro_padrao_media <- sqrt( vvar/n ) * ( 1 - n / N ) 
+
+#erro do inv
+erro_inv_unid <- qt( 0.975, n - 1 ) * erro_padrao_media 
+
+#erro percentual
+erro_inv_perc <- erro_inv_unid/vmed * 100 
+
+#Intervalo de confiança em m³/ha
+
+# cat(paste(round(vmed-erro_inv_unid,2)," a ", round( vmed+erro_inv_unid, 2 ),"m³/ha com 95% de confiança (produto 1)", sep = "" ) )
+
+
+
+#em m³/povoamento
+# cat(paste(round(( vmed - erro_inv_unid) * area_fazenda, 0 ),
+#           " a ",
+#           round(( vmed + erro_inv_unid) * area_fazenda, 0 ),
+#           "m³/fazenda com 95% de confiança (produto 1)", sep = "" ) )
+
+#round(vmed*area_fazenda,0)
+```
+
+De acordo com os dados obtidos no processamento do inventário,
+pode-se esperar uma produção média do produto 1 de 98104m³, com um
+intervalo de confiança de 95115m³ a 101094m³. Sendo o erro percentual amostral de 3.05%.
+
+
+## (b) Erro percentual amostral e intervalo de confiança do volume do produto 2 (com casca) para a população.
+
+
+```{r}
+##### produto 2 --------------------------------------------------------------------
+
+parcela <- aggregate(list( vprod2 = fustes$vprodicc ),
+                     list( talhao = fustes$talhao, parcela = fustes$parcela), sum )
+
+#[m³/parcela]  
+media <- mean( parcela$vprod2 )
+
+#area da parcela  
+areaparc <- mean( ( ( fustes$raio^2 ) * pi ) )
+
+# m³/parc para m³/ha.
+parcela$vprod2_ha <- parcela$vprod2 * 10000/areaparc
+
+#para calcular o volume medio m³/ha  
+vmed <- mean( parcela$vprod2_ha ) 
+#variancia do volume m6/ha  
+vvar <- var( parcela$vprod2_ha ) 
+#desvio padrao do volume m?/ha 
+vdesv <- sd( parcela$vprod2_ha )
+
+n <- length( parcela$vprod2_ha )
+
+talhao <- subset( fustes, duplicated( talhao ) == F,
+                  c("talhao", "area" ) ) 
+#area da fazenda em ha
+area_fazenda <- sum(talhao$area)
+
+#numero de parcelas que cabem na fazenda 
+N <- area_fazenda * 10000 / areaparc 
+
+erro_padrao_media <- sqrt( vvar/ n ) * ( 1 - n/ N ) 
+
+#erro do inv
+erro_inv_unid <- qt( 0.975, n-1) * erro_padrao_media
+
+#erro percentual
+erro_inv_perc <- erro_inv_unid/vmed * 100 
+
+#Intervalo de confiança em m³/ha
+
+# cat(paste(round( vmed - erro_inv_unid, 2 ), " a ", round( vmed + erro_inv_unid, 2 ),"m³/ha com 95% de confiança (produto2)", sep = "" ) )
+
+
+
+#em m³/povoamento
+# cat(paste(round( ( vmed-erro_inv_unid ) *area_fazenda, 0 ),
+#           " a ",
+#           round( ( vmed+erro_inv_unid ) * area_fazenda, 0 ),
+#           "m³/fazenda com 95% de confiança (produto 2)", sep = "" ) )
+
+#round( vmed * area_fazenda, 0 )
+```
+
+De acordo com os dados obtidos no processamento do inventário,
+pode-se esperar uma produção média do produto 2 de 108568m³, com um
+intervalo de confiança de 105160m³ a 111975m³. Sendo o erro percentual amostral de 3.14%.
+
+## (c) Erro percentual amostral e intervalo de confiança do volume total com casca para a população.
+
+```{r}
+##### vtcc --------------------------------------------------------------------
+
+parcela <- aggregate(list( vtcc = fustes$vti ),
+                     list( talhao = fustes$talhao, parcela = fustes$parcela ), sum )
+#[m³/parcela]  
+media <- mean( parcela$vtcc )
+
+#area da parcela  
+areaparc <- mean( ( ( fustes$raio^2 ) * pi ) )
+
+# m³/parc para m³/ha.
+parcela$vtcc_ha <- parcela$vtcc * 10000/areaparc
+
+#para calcular o volume medio m³/ha  
+vmed <- mean( parcela$vtcc_ha ) 
+#variancia do volume m6/ha  
+vvar <- var( parcela$vtcc_ha ) 
+#desvio padrao do volume m³/ha 
+vdesv <- sd( parcela$vtcc_ha )
+
+n <- length( parcela$vtcc_ha )
+
+talhao <- subset( fustes, duplicated( talhao ) == F,
+                  c("talhao", "area" ) ) 
+#area da fazenda em ha
+area_fazenda <- sum( talhao$area ) 
+
+#numero de parcelas que cabem na fazenda 
+N <- area_fazenda * 10000 / areaparc
+
+erro_padrao_media <- sqrt( vvar /n ) * ( 1 - n / N ) 
+
+#erro do inv
+erro_inv_unid <- qt( 0.975, n - 1 ) * erro_padrao_media 
+
+#erro percentual
+erro_inv_perc <- erro_inv_unid / vmed * 100 
+
+#Intervalo de confiança em m³/ha
+
+# cat(paste(round( vmed - erro_inv_unid, 2 )," a ",round( vmed + erro_inv_unid, 2 ),
+#           "m³/ha com 95% de confiança para volume total com casca", sep = "" ) )
+
+
+
+#em m³/povoamento
+# cat(paste(round((vmed-erro_inv_unid)*area_fazenda,0),
+#           " a ",
+#           round((vmed+erro_inv_unid)*area_fazenda,0),
+#           "m³/fazenda com 95% de confiança (volume total com casca da população)", sep = "" ) )
+
+
+#round( vmed * area_fazenda, 0 )
+```
+
+De acordo com os dados obtidos no processamento do inventário,
+pode-se esperar uma produção média do produto 3 de 116896m³, com um
+intervalo de confiança de 113425m³ a 120368m³. Com erro percentual amostral de 2.97%.
+
+# Referências
+
+JÚNIOR, C. F. D. et al. Measure: sistema de coleta de informações para
+inventário florestal. **Tecno-Lógica**, 2020. 
+
+

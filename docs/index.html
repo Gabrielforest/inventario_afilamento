@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.449">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Gabriel de Freitas Pereira">
+
+<title>Processamento de um inventário florestal utilizando funções de afilamento</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link id="quarto-text-highlighting-styles" href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Sumário</h2>
+   
+  <ul>
+  <li><a href="#introdução" id="toc-introdução" class="nav-link active" data-scroll-target="#introdução"> <span class="header-section-number">1</span> Introdução</a></li>
+  <li><a href="#objetivo" id="toc-objetivo" class="nav-link" data-scroll-target="#objetivo"> <span class="header-section-number">2</span> Objetivo</a></li>
+  <li><a href="#explorando-dados-da-cubagem" id="toc-explorando-dados-da-cubagem" class="nav-link" data-scroll-target="#explorando-dados-da-cubagem"> <span class="header-section-number">3</span> Explorando dados da cubagem</a></li>
+  <li><a href="#ajustes-e-predições-dos-modelos" id="toc-ajustes-e-predições-dos-modelos" class="nav-link" data-scroll-target="#ajustes-e-predições-dos-modelos"> <span class="header-section-number">4</span> Ajustes e predições dos modelos</a>
+  <ul class="collapse">
+  <li><a href="#ajuste-polinômio-do-5º-grau" id="toc-ajuste-polinômio-do-5º-grau" class="nav-link" data-scroll-target="#ajuste-polinômio-do-5º-grau"> <span class="header-section-number">4.1</span> Ajuste Polinômio do 5º grau</a></li>
+  <li><a href="#ajuste-bi" id="toc-ajuste-bi" class="nav-link" data-scroll-target="#ajuste-bi"> <span class="header-section-number">4.2</span> Ajuste Bi</a></li>
+  <li><a href="#ajuste-kozak" id="toc-ajuste-kozak" class="nav-link" data-scroll-target="#ajuste-kozak"> <span class="header-section-number">4.3</span> Ajuste Kozak</a></li>
+  <li><a href="#ajuste-ormerod" id="toc-ajuste-ormerod" class="nav-link" data-scroll-target="#ajuste-ormerod"> <span class="header-section-number">4.4</span> Ajuste Ormerod</a></li>
+  </ul></li>
+  <li><a href="#análise-dos-modelos" id="toc-análise-dos-modelos" class="nav-link" data-scroll-target="#análise-dos-modelos"> <span class="header-section-number">5</span> Análise dos modelos</a>
+  <ul class="collapse">
+  <li><a href="#erro-padrão-residual" id="toc-erro-padrão-residual" class="nav-link" data-scroll-target="#erro-padrão-residual"> <span class="header-section-number">5.1</span> Erro padrão residual</a></li>
+  <li><a href="#raiz-do-erro-quadrático-médio" id="toc-raiz-do-erro-quadrático-médio" class="nav-link" data-scroll-target="#raiz-do-erro-quadrático-médio"> <span class="header-section-number">5.2</span> Raiz do erro quadrático médio</a></li>
+  <li><a href="#análise-gráfica" id="toc-análise-gráfica" class="nav-link" data-scroll-target="#análise-gráfica"> <span class="header-section-number">5.3</span> Análise Gráfica</a></li>
+  </ul></li>
+  <li><a href="#cálculo-dos-produtos-para-produção-madeireira" id="toc-cálculo-dos-produtos-para-produção-madeireira" class="nav-link" data-scroll-target="#cálculo-dos-produtos-para-produção-madeireira"> <span class="header-section-number">6</span> Cálculo dos produtos para produção madeireira</a>
+  <ul class="collapse">
+  <li><a href="#a-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-1-sem-casca-para-a-população." id="toc-a-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-1-sem-casca-para-a-população." class="nav-link" data-scroll-target="#a-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-1-sem-casca-para-a-população."> <span class="header-section-number">6.1</span> (a) Erro percentual amostral e intervalo de confiança do volume do produto 1 (sem casca) para a população.</a></li>
+  <li><a href="#b-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-2-com-casca-para-a-população." id="toc-b-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-2-com-casca-para-a-população." class="nav-link" data-scroll-target="#b-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-2-com-casca-para-a-população."> <span class="header-section-number">6.2</span> (b) Erro percentual amostral e intervalo de confiança do volume do produto 2 (com casca) para a população.</a></li>
+  <li><a href="#c-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-total-com-casca-para-a-população." id="toc-c-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-total-com-casca-para-a-população." class="nav-link" data-scroll-target="#c-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-total-com-casca-para-a-população."> <span class="header-section-number">6.3</span> (c) Erro percentual amostral e intervalo de confiança do volume total com casca para a população.</a></li>
+  </ul></li>
+  <li><a href="#referências" id="toc-referências" class="nav-link" data-scroll-target="#referências"> <span class="header-section-number">7</span> Referências</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Processamento de um inventário florestal utilizando funções de afilamento</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor</div>
+    <div class="quarto-title-meta-contents">
+             <p>Gabriel de Freitas Pereira </p>
+          </div>
+  </div>
+    
+    
+  </div>
+  
+
+</header>
+
+<section id="introdução" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introdução</h1>
+<p>Um inventário florestal é uma prática que busca a quantificação, e por conseguinte, a qualificação das florestas em diferentes aspectos, como a produção de madeira entre outros possíveis produtos, através do uso de técnicas estatísticas de amostragem. Sendo assim, o inventário visa obter o máximo de informações de uma floresta com a máxima precisão e o mínimo custo. Esses três fatores desempenham papel importante no planejamento de um inventário florestal (JÚNIOR et al., 2020).</p>
+</section>
+<section id="objetivo" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Objetivo</h1>
+<p>Realizar o inventário florestal de um povoamento com um cultivar de <em>Eucalyptus grandis</em> W. Hill ex Maiden x <em>Eucalyptus urophylla</em> S. T. Blake na região noroeste do Estado de Minas Gerais, para a estimar a produção madeireira dos seguintes produtos de forma independente:</p>
+<ol type="1">
+<li><p>PRODUTO 1: diâmetro mínimo de 5, 5cm sem casca e comprimento de tora de 5, 6m.</p></li>
+<li><p>PRODUTO 2: diâmetro mínimo de 7, 5cm com casca e comprimento de tora de 3, 3m.</p></li>
+<li><p>VOLUME TOTAL COM CASCA.</p></li>
+</ol>
+</section>
+<section id="explorando-dados-da-cubagem" class="level1 page-columns page-full" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Explorando dados da cubagem</h1>
+<div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>arv <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>( <span class="st">"cubagem.csv"</span> )</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>dap <span class="ot">&lt;-</span> arv<span class="sc">$</span>cap <span class="sc">/</span> pi</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>disc <span class="ot">&lt;-</span> arv<span class="sc">$</span>dicc <span class="sc">-</span> ( <span class="dv">2</span> <span class="sc">*</span> arv<span class="sc">$</span>espcasca )</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>( <span class="at">mfrow =</span> <span class="fu">c</span>( <span class="dv">1</span>, <span class="dv">2</span> ),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">20</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">bg =</span> <span class="st">"#171717"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">col.axis =</span> <span class="st">"white"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">col.lab =</span> <span class="st">"white"</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">col.main =</span> <span class="st">"white"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">fg =</span> <span class="st">"white"</span> ) </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>( arv, <span class="fu">plot</span>( hi<span class="sc">/</span>ht, dicc, <span class="at">pch =</span> <span class="dv">20</span> ) )</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>( arv, <span class="fu">plot</span>( hi, dicc, <span class="at">pch =</span> <span class="dv">20</span> ) )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Figura 1. Relação altura com o diâmetro com casca</p>
+</div></div></section>
+<section id="ajustes-e-predições-dos-modelos" class="level1 page-columns page-full" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Ajustes e predições dos modelos</h1>
+<p>Quatro modelos foram ajustados considerando:</p>
+<p><span class="math inline">\(\beta_1,\beta_2 ...,\beta_n\)</span> = parâmetros do modelo;</p>
+<p><span class="math inline">\(h_i\)</span> = altura até seção <code>i</code> do fuste;</p>
+<p><span class="math inline">\(d_i\)</span> = diâmetro na seção <code>i</code> do fuste;</p>
+<p><span class="math inline">\(d\)</span> = diâmetro à altura do peito;</p>
+<p><span class="math inline">\(h\)</span> = altura da árvore.</p>
+<p><span class="math inline">\(p\)</span> = primeiro ponto de inflexão calculado no modelo segmentado de Max &amp; Burkhart (1976).</p>
+<p>A partir disso foram feitas as estimativas dos diâmetros sem casca e com casca para cada modelo.</p>
+<section id="ajuste-polinômio-do-5º-grau" class="level2 page-columns page-full" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="ajuste-polinômio-do-5º-grau"><span class="header-section-number">4.1</span> Ajuste Polinômio do 5º grau</h2>
+<p><img src="eq_5grau.PNG" class="img-fluid"></p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Função de Schöepfer (1966)</p>
+</div></div><div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' #### Ajuste com casca</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Ajuste linear</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>hih <span class="ot">&lt;-</span> arv<span class="sc">$</span>hi <span class="sc">/</span> arv<span class="sc">$</span>ht</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>did <span class="ot">&lt;-</span> arv<span class="sc">$</span>dicc <span class="sc">/</span> arv<span class="sc">$</span>dap</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ajlin <span class="ot">&lt;-</span> <span class="fu">lm</span>( did <span class="sc">~</span> hih <span class="sc">+</span> <span class="fu">I</span>( hih<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">+</span> <span class="fu">I</span>( hih<span class="sc">^</span><span class="dv">3</span> )  <span class="sc">+</span> <span class="fu">I</span>( hih<span class="sc">^</span><span class="dv">4</span> ) <span class="sc">+</span> <span class="fu">I</span>( hih<span class="sc">^</span><span class="dv">5</span> ), arv )</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Erro padrão residual</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>syx <span class="ot">&lt;-</span> <span class="fu">summary</span>( ajlin )<span class="sc">$</span>sigma</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>syxperc <span class="ot">&lt;-</span> syx<span class="sc">/</span><span class="fu">mean</span>( arv<span class="sc">$</span>dicc ) <span class="sc">*</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>( arv<span class="sc">$</span>dap )</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>diccest5grau <span class="ot">&lt;-</span> <span class="fu">predict</span>( ajlin ) <span class="sc">*</span> arv<span class="sc">$</span>dap</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>RMSE_kozcc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( diccest5grau <span class="sc">-</span> dicc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( diccest5grau ) ) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#' #### Ajuste sem casca </span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Ajuste linear</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>didsc <span class="ot">&lt;-</span> arv<span class="sc">$</span>disc <span class="sc">/</span> arv<span class="sc">$</span>dap</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>ajlinsc <span class="ot">&lt;-</span> <span class="fu">lm</span>( didsc <span class="sc">~</span> hih <span class="sc">+</span> <span class="fu">I</span>( hih<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">+</span> <span class="fu">I</span>( hih<span class="sc">^</span><span class="dv">3</span> )  <span class="sc">+</span> <span class="fu">I</span>( hih<span class="sc">^</span><span class="dv">4</span> ) <span class="sc">+</span> <span class="fu">I</span>( hih<span class="sc">^</span><span class="dv">5</span> ), arv )</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Erro padrão residual</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>syxsc <span class="ot">&lt;-</span> <span class="fu">summary</span>( ajlinsc )<span class="sc">$</span>sigma</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>syxpercsc <span class="ot">&lt;-</span> syxsc<span class="sc">/</span><span class="fu">mean</span>( arv<span class="sc">$</span>disc ) <span class="sc">*</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>( arv<span class="sc">$</span>dap )</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>discest5grau <span class="ot">&lt;-</span> <span class="fu">predict</span>( ajlinsc ) <span class="sc">*</span> arv<span class="sc">$</span>dap</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>RMSE_kozsc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( discest5grau <span class="sc">-</span> disc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( discest5grau ) ) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="ajuste-bi" class="level2 page-columns page-full" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="ajuste-bi"><span class="header-section-number">4.2</span> Ajuste Bi</h2>
+<p><img src="eq_BI2000.PNG" class="img-fluid"></p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Função trigonométrica de forma variável de Bi (2000).</p>
+</div></div><div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' #### Ajuste com casca</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Ajuste não linear</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>hih <span class="ot">&lt;-</span> arv<span class="sc">$</span>hi <span class="sc">/</span> arv<span class="sc">$</span>ht</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>bi <span class="ot">&lt;-</span>  <span class="fu">nlsLM</span>( dicc <span class="sc">~</span> <span class="fu">taper_bi</span>( dap, ht, hih, b0, b1, b2, b3, b4, b5, b6 ),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> arv,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">start =</span> <span class="fu">list</span>( <span class="at">b0 =</span> <span class="fl">1.8</span>, </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b1 =</span> <span class="sc">-</span><span class="fl">0.2</span>, </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b2 =</span> <span class="sc">-</span><span class="fl">0.04</span>, </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b3 =</span> <span class="sc">-</span><span class="fl">0.9</span>, </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b4 =</span> <span class="sc">-</span><span class="fl">0.0006</span>, </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b5 =</span> <span class="fl">0.07</span>, </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b6 =</span> <span class="sc">-</span><span class="fl">0.14</span> ) )</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Erro padrão residual</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>bisyx <span class="ot">&lt;-</span> <span class="fu">summary</span>( bi )<span class="sc">$</span>sigma</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>bisyxperc <span class="ot">&lt;-</span> bisyx<span class="sc">/</span><span class="fu">mean</span>( arv<span class="sc">$</span>dicc ) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>diccestbi <span class="ot">&lt;-</span> <span class="fu">predict</span>( bi )</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>RMSE_bi <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( diccestbi <span class="sc">-</span> dicc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( diccestbi ) ) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#' #### Ajuste sem casca </span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Ajuste não linear</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>bisc <span class="ot">&lt;-</span> <span class="fu">nlsLM</span>( disc <span class="sc">~</span> <span class="fu">taper_bi</span>( dap, ht, hih, b0, b1, b2, b3, b4, b5, b6 ),</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> arv,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>              <span class="at">start =</span> <span class="fu">list</span>( <span class="at">b0 =</span> <span class="fl">1.8</span>, </span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b1 =</span> <span class="sc">-</span><span class="fl">0.2</span>, </span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b2 =</span> <span class="sc">-</span><span class="fl">0.04</span>, </span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b3 =</span> <span class="sc">-</span><span class="fl">0.9</span>, </span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b4 =</span> <span class="sc">-</span><span class="fl">0.0006</span>, </span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b5 =</span> <span class="fl">0.07</span>, </span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>                            <span class="at">b6 =</span> <span class="sc">-</span><span class="fl">0.14</span> ) )</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Erro padrão residual</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>bisyxsc <span class="ot">&lt;-</span> <span class="fu">summary</span>( bisc )<span class="sc">$</span>sigma</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>bisyxpercsc <span class="ot">&lt;-</span> bisyxsc<span class="sc">/</span><span class="fu">mean</span>( arv<span class="sc">$</span>disc ) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>discestbi <span class="ot">&lt;-</span> <span class="fu">predict</span>( bisc )</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>RMSE_bisc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( discestbi <span class="sc">-</span> disc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( discestbi ) ) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="ajuste-kozak" class="level2 page-columns page-full" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="ajuste-kozak"><span class="header-section-number">4.3</span> Ajuste Kozak</h2>
+<p><img src="eq_Kozak2004.PNG" class="img-fluid"></p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Função de Kozak (2004)</p>
+</div></div><div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' #### Ajuste com casca</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Ajuste não linear</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>kozak <span class="ot">&lt;-</span> <span class="fu">nlsLM</span>( dicc <span class="sc">~</span> <span class="fu">taper_kozak</span>( dap, ht, hih, b0, b1, b2, b3, b4, b5, b6, b7, b8, p ),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">start =</span> <span class="fu">list</span>( <span class="at">b0 =</span> <span class="fl">1.00</span>, <span class="at">b1 =</span> <span class="fl">0.97</span>, <span class="at">b2 =</span> <span class="fl">0.03</span>, <span class="at">b3 =</span> <span class="fl">0.49</span>, <span class="at">b4 =</span> <span class="sc">-</span><span class="fl">0.87</span>, <span class="at">b5 =</span> <span class="fl">0.50</span>, <span class="at">b6 =</span> <span class="fl">3.88</span>, <span class="at">b7 =</span> <span class="fl">0.03</span>, <span class="at">b8 =</span> <span class="sc">-</span><span class="fl">0.19</span>, <span class="at">p =</span> <span class="fl">0.1</span> ),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> arv,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">control =</span> <span class="fu">nls.lm.control</span>( <span class="at">maxiter =</span> <span class="dv">1000</span>, <span class="at">maxfev =</span> <span class="dv">2000</span> )</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Erro padrão residual</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>kosyx <span class="ot">&lt;-</span> <span class="fu">summary</span>( kozak )<span class="sc">$</span>sigma</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>kosyxperc <span class="ot">&lt;-</span> kosyx<span class="sc">/</span><span class="fu">mean</span>( arv<span class="sc">$</span>dicc ) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>diccestkoz <span class="ot">&lt;-</span> <span class="fu">predict</span>( kozak )</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>RMSE_kozcc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( diccestkoz <span class="sc">-</span> dicc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( diccestkoz ) ) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#' #### Ajuste sem casca</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Ajuste não linear</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>kozaksc <span class="ot">&lt;-</span> <span class="fu">nlsLM</span>( disc <span class="sc">~</span> <span class="fu">taper_kozak</span>( dap, ht, hih, b0, b1, b2, b3, b4, b5, b6, b7, b8, p ),</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>               <span class="at">start =</span> <span class="fu">list</span>( <span class="at">b0 =</span> <span class="fl">1.00</span>, <span class="at">b1 =</span> <span class="fl">0.97</span>, <span class="at">b2 =</span> <span class="fl">0.03</span>, <span class="at">b3 =</span> <span class="fl">0.49</span>, <span class="at">b4 =</span> <span class="sc">-</span><span class="fl">0.87</span>, <span class="at">b5 =</span> <span class="fl">0.50</span>, <span class="at">b6 =</span> <span class="fl">3.88</span>, <span class="at">b7 =</span> <span class="fl">0.03</span>, <span class="at">b8 =</span> <span class="sc">-</span><span class="fl">0.19</span>, <span class="at">p =</span> <span class="fl">0.1</span> ),</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> arv,</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>               <span class="at">control =</span> <span class="fu">nls.lm.control</span>( <span class="at">maxiter =</span> <span class="dv">1000</span>, <span class="at">maxfev =</span> <span class="dv">2000</span> )</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Erro padrão residual</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>kosyxsc <span class="ot">&lt;-</span> <span class="fu">summary</span>( kozaksc )<span class="sc">$</span>sigma</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>kosyxpercsc <span class="ot">&lt;-</span> kosyxsc<span class="sc">/</span><span class="fu">mean</span>( arv<span class="sc">$</span>disc ) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>discestkoz <span class="ot">&lt;-</span> <span class="fu">predict</span>( kozaksc )</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>RMSE_kozsc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( discestkoz <span class="sc">-</span> disc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( discestkoz ) ) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="ajuste-ormerod" class="level2 page-columns page-full" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="ajuste-ormerod"><span class="header-section-number">4.4</span> Ajuste Ormerod</h2>
+<p><img src="eq_ormerod.PNG" class="img-fluid"></p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Função de Ormerod (1973)</p>
+</div></div><div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' #### Ajuste com casca</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Ajuste não linear</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ormerod <span class="ot">&lt;-</span> <span class="fu">nls</span>(<span class="st">"dicc~dap*((ht-hi)/(ht-1.3))^b1"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>               arv,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">start =</span> <span class="fu">list</span>( <span class="at">b1 =</span> <span class="fl">0.1</span> ) )</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Erro padrão residual</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>orsyx <span class="ot">&lt;-</span> <span class="fu">summary</span>( ormerod )<span class="sc">$</span>sigma</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>orsyxperc <span class="ot">&lt;-</span> orsyx<span class="sc">/</span><span class="fu">mean</span>( arv<span class="sc">$</span>dicc ) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>diccestorm <span class="ot">&lt;-</span> <span class="fu">predict</span>( ormerod )</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>RMSE_ormcc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( diccestorm <span class="sc">-</span> dicc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( diccestorm ) ) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#' #### Ajuste sem casca</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>ormerodsc <span class="ot">&lt;-</span> <span class="fu">nls</span>(<span class="st">"disc~dap*((ht-hi)/(ht-1.3))^b1"</span>,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                 arv,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                 <span class="at">start =</span> <span class="fu">list</span>( <span class="at">b1 =</span> <span class="fl">0.1</span> ) )</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### Erro padrão residual</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>orsyxsc <span class="ot">&lt;-</span> <span class="fu">summary</span>( ormerodsc )<span class="sc">$</span>sigma</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>orsyxpercsc <span class="ot">&lt;-</span> orsyxsc<span class="sc">/</span><span class="fu">mean</span>( arv<span class="sc">$</span>disc ) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>discestorm <span class="ot">&lt;-</span> <span class="fu">predict</span>( ormerodsc )</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>RMSE_ormsc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( discestorm <span class="sc">-</span> disc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( discestorm ) ) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="análise-dos-modelos" class="level1 page-columns page-full" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Análise dos modelos</h1>
+<section id="erro-padrão-residual" class="level2 page-columns page-full" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="erro-padrão-residual"><span class="header-section-number">5.1</span> Erro padrão residual</h2>
+<table class="table">
+<caption>Erro padrão residual dos modelos testados</caption>
+<colgroup>
+<col style="width: 30%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Modelos</th>
+<th>Erro Padrão Residual (% com casca)</th>
+<th>Erro Padrão Residual (% sem casca)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Schöepfer (1966)</td>
+<td>5.171111</td>
+<td>5.215619</td>
+</tr>
+<tr class="even">
+<td>Bi (2000)</td>
+<td>4.239943</td>
+<td>6.557174</td>
+</tr>
+<tr class="odd">
+<td>Kozak (2004)</td>
+<td>4.238015</td>
+<td>4.393806</td>
+</tr>
+<tr class="even">
+<td>Ormerod (1973)</td>
+<td>6.655004</td>
+<td>7.410827</td>
+</tr>
+</tbody>
+</table>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Tabela 1.</p>
+</div></div><p>Quanto menor o erro padrão residual mais distante do ideal o modelo se encontra, ou seja, os resíduos estão mais distantes do valor real. Desse modo, comparando os modelos de forma <strong>isolada a partir dessa métrica estatística</strong> os modelos de Kozak e Bi obtiveram os melhores resultados para as estimativas de diâmetro com casca. Já para as estimativas de diâmetro sem casca, o modelo de Kozak foi o melhor. No entanto, vale ressaltar que uma métrica não é suficiente para escolhermos o melhor modelo de acordo com a nossa base, é necessário analisarmos outros fatores, que serão discutidos nesse relatório.</p>
+</section>
+<section id="raiz-do-erro-quadrático-médio" class="level2 page-columns page-full" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="raiz-do-erro-quadrático-médio"><span class="header-section-number">5.2</span> Raiz do erro quadrático médio</h2>
+<table class="table">
+<caption>Raiz do erro quadrático médio dos modelos testados</caption>
+<colgroup>
+<col style="width: 30%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Modelos</th>
+<th>RMSE (com casca)</th>
+<th>RMSE (sem casca)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Schöepfer (1966)</td>
+<td>8.51</td>
+<td>8.18</td>
+</tr>
+<tr class="even">
+<td>Bi (2000)</td>
+<td>7.49</td>
+<td>11.05</td>
+</tr>
+<tr class="odd">
+<td>Kozak (2004)</td>
+<td>7.47</td>
+<td>7.47</td>
+</tr>
+<tr class="even">
+<td>Ormerod (1973)</td>
+<td>11.84</td>
+<td>12.47</td>
+</tr>
+</tbody>
+</table>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Tabela 2.</p>
+</div></div><p>A raiz quadrada do erro médio, RMSE (<strong>Root Mean Squared Error</strong>) é a raiz quadrada do erro médio, que nos auxilia a verificar a acurácia dos modelos, penalizando erros maiores, ou seja, é uma métrica mais sensível aos erros devido ao processo de quadratura que a produziu. Sendo assim, analisando os resultados dessa métrica quanto maior o RMSE pior será o modelo, logo, os modelos de Kozak e Bi novamente foram os melhores para as estimativas dos diâmetros com casca. E para as estimativas dos diâmetros sem casca, o modelo de Kozak também foi o melhor, se destacando entre os modelos testados para duas métricas estatísticas.</p>
+</section>
+<section id="análise-gráfica" class="level2 page-columns page-full" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="análise-gráfica"><span class="header-section-number">5.3</span> Análise Gráfica</h2>
+<div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Resíduos</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### 5° grau</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>res5grau <span class="ot">&lt;-</span> <span class="fu">residuals</span>( ajlin ) <span class="sc">*</span> arv<span class="sc">$</span>dap</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>res5grausc <span class="ot">&lt;-</span> <span class="fu">residuals</span>( ajlinsc ) <span class="sc">*</span> arv<span class="sc">$</span>dap</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### methol</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>resbi <span class="ot">&lt;-</span> <span class="fu">residuals</span>( bi )</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>resbisc <span class="ot">&lt;-</span> <span class="fu">residuals</span>( bisc )</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### kozak</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>reskoz <span class="ot">&lt;-</span> <span class="fu">residuals</span>( kozak )</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>reskozsc <span class="ot">&lt;-</span> <span class="fu">residuals</span>( kozaksc )</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### ormerod</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>resorm <span class="ot">&lt;-</span> <span class="fu">residuals</span>( ormerod )</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>resormsc <span class="ot">&lt;-</span> <span class="fu">residuals</span>( ormerodsc )</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>( <span class="at">mfrow =</span> <span class="fu">c</span>( <span class="dv">2</span>, <span class="dv">2</span> ),</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">20</span>,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">bg =</span> <span class="st">"#171717"</span>,</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">col.axis =</span> <span class="st">"white"</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">col.lab =</span> <span class="st">"white"</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>     <span class="at">col.main =</span> <span class="st">"white"</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>     <span class="at">fg =</span> <span class="st">"white"</span> ) </span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>fBasics<span class="sc">::</span><span class="fu">qqnormPlot</span>( ( arv<span class="sc">$</span>res5grausc ), <span class="at">title =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">"Schöepfer"</span> )</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>fBasics<span class="sc">::</span><span class="fu">qqnormPlot</span>( ( arv<span class="sc">$</span>resbisc ), <span class="at">title =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">"Bi"</span> )</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>fBasics<span class="sc">::</span><span class="fu">qqnormPlot</span>( ( arv<span class="sc">$</span>reskozsc ), <span class="at">title =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">"Kozak"</span> )</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>fBasics<span class="sc">::</span><span class="fu">qqnormPlot</span>( ( arv<span class="sc">$</span>resormsc ), <span class="at">title =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">"Ormerod"</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Figura 2. Gráfico de quantis de todos modelos testados - Diâmetros com casca.</p>
+</div></div><div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>( <span class="at">mfrow =</span> <span class="fu">c</span>( <span class="dv">2</span>, <span class="dv">2</span> ),</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">pch =</span> <span class="dv">20</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">bg =</span> <span class="st">"#171717"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">col.axis =</span> <span class="st">"white"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">col.lab =</span> <span class="st">"white"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="at">col.main =</span> <span class="st">"white"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="at">fg =</span> <span class="st">"white"</span> ) </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>graficos_res <span class="ot">&lt;-</span> <span class="cf">function</span>( hi, res, modelo, <span class="at">xlab =</span> <span class="st">"hi(m)"</span> ) {</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>( hi, res, </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">pch =</span> <span class="dv">20</span>, </span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylim =</span> <span class="fu">c</span>( <span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span> ),</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"Resíduo (m³)"</span>, </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> modelo )</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>( <span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"red"</span> )</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">graficos_res</span>( arv<span class="sc">$</span>hi, arv<span class="sc">$</span>res5grau, <span class="st">"Schöepfer"</span> )</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">graficos_res</span>( arv<span class="sc">$</span>hi, arv<span class="sc">$</span>resbi, <span class="st">"Bi"</span> )</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">graficos_res</span>( arv<span class="sc">$</span>hi, arv<span class="sc">$</span>reskoz, <span class="st">"Kozak"</span> )</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="fu">graficos_res</span>( arv<span class="sc">$</span>hi, arv<span class="sc">$</span>resorm, <span class="st">"Ormerod"</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Figura 3. Gráfico de resíduos de todos modelos testados - Diâmetros com casca.</p>
+</div></div><p>Quando analisados os gráficos de resíduos (Figura 3) e os gráficos de normalidade dos resíduos QQ-plot (Figura 2), foi possível notar que os melhores modelos que apresentaram distribuições mais agrupadas em torno do zero, foram os modelos de Kozak e Bi. Sendo o modelo de Kozak aparentemente mais próximo do ideal nas ponteiras das árvores. Já os demais modelos apresentaram erros maiores (mais distantes de zero), principalmente na base das árvores.</p>
+<div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>( <span class="at">mfrow =</span> <span class="fu">c</span>( <span class="dv">2</span>, <span class="dv">2</span> ),</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">pch =</span> <span class="dv">20</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">bg =</span> <span class="st">"#171717"</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">col.axis =</span> <span class="st">"white"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="at">col.lab =</span> <span class="st">"white"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="at">col.main =</span> <span class="st">"white"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="at">fg =</span> <span class="st">"white"</span> ) </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>fBasics<span class="sc">::</span><span class="fu">qqnormPlot</span>((arv<span class="sc">$</span>res5grausc),<span class="at">title =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">"Schöepfer"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>fBasics<span class="sc">::</span><span class="fu">qqnormPlot</span>((arv<span class="sc">$</span>resbisc),<span class="at">title =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">"Bi"</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>fBasics<span class="sc">::</span><span class="fu">qqnormPlot</span>((arv<span class="sc">$</span>reskozsc),<span class="at">title =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">"Kozak"</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>fBasics<span class="sc">::</span><span class="fu">qqnormPlot</span>((arv<span class="sc">$</span>resormsc),<span class="at">title =</span> <span class="cn">FALSE</span>, <span class="at">main =</span> <span class="st">"Ormerod"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Figura 4. Gráfico de quantis de todos modelos testados - Diâmetros sem casca.</p>
+</div></div><div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>( <span class="at">mfrow =</span> <span class="fu">c</span>( <span class="dv">2</span>, <span class="dv">2</span> ),</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="at">pch =</span> <span class="dv">20</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">bg =</span> <span class="st">"#171717"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">col.axis =</span> <span class="st">"white"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">col.lab =</span> <span class="st">"white"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="at">col.main =</span> <span class="st">"white"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">fg =</span> <span class="st">"white"</span> ) </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">graficos_res</span>( arv<span class="sc">$</span>hi, arv<span class="sc">$</span>res5grausc, <span class="st">"Schöepfer"</span> )</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">graficos_res</span>( arv<span class="sc">$</span>hi, arv<span class="sc">$</span>resbisc, <span class="st">"Bi"</span> )</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">graficos_res</span>( arv<span class="sc">$</span>hi, arv<span class="sc">$</span>reskozsc, <span class="st">"Kozak"</span> )</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">graficos_res</span>( arv<span class="sc">$</span>hi, arv<span class="sc">$</span>resormsc, <span class="st">"Ormerod"</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Figura 5. Gráfico de resíduos de todos modelos testados - Diâmetros sem casca.</p>
+</div></div><p>A partir da Figura 4, a qual representa o gráfico de quantis é possível observar que os resíduos afirmam a normalidade. Além disso, com a análise dos gráficos de resíduos dispostos na Figura 3, foi possível notar que o melhor modelo, o qual apresentou a melhor dispersão de resíduos devido às suas distribuições serem mais agrupadas em torno do zero, foi o modelo de Kozak. Sendo os modelos de Kozak e Schöepfer, aparentemente mais próximos do ideal, tanto na base quanto nas ponteiras das árvores, quando comparado com os demais. Sendo assim, os demais modelos apresentaram erros maiores (mais distantes de zero), principalmente na base das árvores.</p>
+</section>
+</section>
+<section id="cálculo-dos-produtos-para-produção-madeireira" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Cálculo dos produtos para produção madeireira</h1>
+<div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># coeficientes para obtenção dos volumes</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>coef_kozak <span class="ot">&lt;-</span> <span class="fu">coef</span>( kozak )</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>coef_kozaksc <span class="ot">&lt;-</span> <span class="fu">coef</span>( kozaksc )</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="do">###### volume produto com casca  --------------------------------------------------------------------</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># A tabela de sortimentos deve conter cinco colunas, que podem ter qualquer nome, mas devem estar na seguinte ordem: </span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#diâmetro da tora na ponta fina, em centímetros; </span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">#comprimento mínimo da tora (líquido), em metros; comprimento máximo da tora (líquido), em metros; </span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">#e a perda resultante do traçamento de cada tora, em centímetros. Um ponto de atenção é que as linhas da tabela representam os produtos da madeira, e estes devem estar ordenados do mais valioso para o menos valioso, de modo que o algoritmo de extração de toras priorize aos produtos de maior valor comercial.</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co"># afilamento usando timbeR::poly5_logs</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>fustes <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>( <span class="st">"fustes.csv"</span> )</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>sortimentoscc <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">NAME =</span> <span class="fu">c</span>( <span class="st">"cc"</span> ),</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">SED =</span> <span class="fu">c</span>( <span class="fl">7.5</span> ),</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">min =</span> <span class="fu">c</span>( <span class="dv">2</span> ),</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">max =</span> <span class="fu">c</span>( <span class="fl">3.3</span> ),</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">LOSS =</span> <span class="fu">c</span>( <span class="dv">10</span> )</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="co"># testando para produtos com casca</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>vticc <span class="ot">&lt;-</span> <span class="fu">mapply</span>( kozak_logs,</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>                 <span class="at">dbh =</span> fustes<span class="sc">$</span>cap<span class="sc">/</span>pi,</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>                 <span class="at">h =</span> fustes<span class="sc">$</span>htre,</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>                 <span class="at">MoreArgs =</span> <span class="fu">list</span>(</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>                   <span class="at">coef =</span> coef_kozak[ <span class="sc">-</span><span class="dv">10</span> ],</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>                   <span class="at">p =</span> coef_kozak[ <span class="dv">10</span> ],</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>                   <span class="at">assortments =</span> sortimentoscc,</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>                   <span class="at">total_volume =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>                   <span class="at">only_vol =</span> <span class="cn">TRUE</span> ) )</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>vticc <span class="ot">&lt;-</span> <span class="fu">t</span>( vticc )</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>vticc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>( vticc )</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>vticc<span class="sc">$</span>cc <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>( vticc<span class="sc">$</span>cc )</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>vticc<span class="sc">$</span>Total <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>( vticc<span class="sc">$</span>Total )</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a><span class="do">###### volume produto sem casca --------------------------------------------------------------------</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>sortimentos <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">NAME =</span> <span class="fu">c</span>( <span class="st">"sc"</span> ),</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">SED =</span> <span class="fu">c</span>( <span class="fl">5.5</span> ),</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">min =</span> <span class="fu">c</span>( <span class="dv">2</span> ),</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">max =</span> <span class="fu">c</span>( <span class="fl">5.6</span> ),</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">LOSS =</span> <span class="fu">c</span>( <span class="dv">10</span> )</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a><span class="co"># testando para produtos sem casca</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>vtisc <span class="ot">&lt;-</span> <span class="fu">mapply</span>( kozak_logs,</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>                 <span class="at">dbh =</span> fustes<span class="sc">$</span>cap<span class="sc">/</span>pi,</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>                 <span class="at">h =</span> fustes<span class="sc">$</span>htre,</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>                 <span class="at">MoreArgs =</span> <span class="fu">list</span>(</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>                   <span class="at">coef =</span> coef_kozaksc[ <span class="sc">-</span><span class="dv">10</span> ],</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>                   <span class="at">p =</span> coef_kozaksc[ <span class="dv">10</span> ],</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>                   <span class="at">assortments =</span> sortimentos,</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>                   <span class="at">total_volume =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>                   <span class="at">only_vol =</span> <span class="cn">TRUE</span> ) )</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>vtisc <span class="ot">&lt;-</span> <span class="fu">t</span>( vtisc )</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>vtisc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>( vtisc )</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>vtisc<span class="sc">$</span>sc <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>( vtisc<span class="sc">$</span>sc )</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a><span class="do">###### Juntando resultados para fazer inventário de cada sortimento.</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>fustes <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>( <span class="st">"fustes.csv"</span> )</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>fustes<span class="sc">$</span>vprodisc <span class="ot">&lt;-</span> vtisc<span class="sc">$</span>sc</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>fustes<span class="sc">$</span>vprodicc <span class="ot">&lt;-</span> vticc<span class="sc">$</span>cc</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>fustes<span class="sc">$</span>vti <span class="ot">&lt;-</span> vticc<span class="sc">$</span>Total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="a-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-1-sem-casca-para-a-população." class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="a-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-1-sem-casca-para-a-população."><span class="header-section-number">6.1</span> (a) Erro percentual amostral e intervalo de confiança do volume do produto 1 (sem casca) para a população.</h2>
+<div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">##### produto 1  --------------------------------------------------------------------</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>parcela <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(<span class="fu">list</span>( <span class="at">vprod1 =</span> fustes<span class="sc">$</span>vprodisc ),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">list</span>( <span class="at">talhao =</span> fustes<span class="sc">$</span>talhao, <span class="at">parcela =</span> fustes<span class="sc">$</span>parcela ), sum )</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#[m³/parcela]  </span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>media <span class="ot">&lt;-</span> <span class="fu">mean</span>(parcela<span class="sc">$</span>vprod1)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># area da parcela  </span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>areaparc <span class="ot">&lt;-</span> <span class="fu">mean</span>(((fustes<span class="sc">$</span>raio<span class="sc">^</span><span class="dv">2</span>)<span class="sc">*</span>pi))</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co"># m³/parc para m³/ha.</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>parcela<span class="sc">$</span>vprod1_ha<span class="ot">&lt;-</span>parcela<span class="sc">$</span>vprod1<span class="sc">*</span><span class="dv">10000</span><span class="sc">/</span>areaparc</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># para calcular o volume medio m³/ha  </span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>vmed <span class="ot">&lt;-</span> <span class="fu">mean</span>(parcela<span class="sc">$</span>vprod1_ha)  </span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co"># variancia do volume m6/ha  </span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>vvar <span class="ot">&lt;-</span> <span class="fu">var</span>(parcela<span class="sc">$</span>vprod1_ha)  </span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="co"># desvio padrao do volume m³/ha </span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>vdesv <span class="ot">&lt;-</span> <span class="fu">sd</span>(parcela<span class="sc">$</span>vprod1_ha)  </span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">length</span>(parcela<span class="sc">$</span>vprod1_ha)  </span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>talhao <span class="ot">&lt;-</span> <span class="fu">subset</span>(fustes, <span class="fu">duplicated</span>( talhao ) <span class="sc">==</span> F,</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">c</span>( <span class="st">"talhao"</span>, <span class="st">"area"</span>) )</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="co">#area da fazenda em ha</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>area_fazenda <span class="ot">&lt;-</span> <span class="fu">sum</span>(talhao<span class="sc">$</span>area)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="co">#numero de parcelas que cabem na fazenda </span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> area_fazenda <span class="sc">*</span> <span class="dv">10000</span><span class="sc">/</span>areaparc  </span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>erro_padrao_media <span class="ot">&lt;-</span> <span class="fu">sqrt</span>( vvar<span class="sc">/</span>n ) <span class="sc">*</span> ( <span class="dv">1</span> <span class="sc">-</span> n <span class="sc">/</span> N ) </span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="co">#erro do inv</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>erro_inv_unid <span class="ot">&lt;-</span> <span class="fu">qt</span>( <span class="fl">0.975</span>, n <span class="sc">-</span> <span class="dv">1</span> ) <span class="sc">*</span> erro_padrao_media </span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="co">#erro percentual</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>erro_inv_perc <span class="ot">&lt;-</span> erro_inv_unid<span class="sc">/</span>vmed <span class="sc">*</span> <span class="dv">100</span> </span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="co">#Intervalo de confiança em m³/ha</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round(vmed-erro_inv_unid,2)," a ", round( vmed+erro_inv_unid, 2 ),"m³/ha com 95% de confiança (produto 1)", sep = "" ) )</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round(( vmed - erro_inv_unid) * area_fazenda, 0 ),</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           " a ",</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           round(( vmed + erro_inv_unid) * area_fazenda, 0 ),</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/fazenda com 95% de confiança (produto 1)", sep = "" ) )</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="co">#round(vmed*area_fazenda,0)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>De acordo com os dados obtidos no processamento do inventário, pode-se esperar uma produção média do produto 1 de 98104m³, com um intervalo de confiança de 95115m³ a 101094m³. Sendo o erro percentual amostral de 3.05%.</p>
+</section>
+<section id="b-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-2-com-casca-para-a-população." class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="b-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-2-com-casca-para-a-população."><span class="header-section-number">6.2</span> (b) Erro percentual amostral e intervalo de confiança do volume do produto 2 (com casca) para a população.</h2>
+<div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">##### produto 2 --------------------------------------------------------------------</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>parcela <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(<span class="fu">list</span>( <span class="at">vprod2 =</span> fustes<span class="sc">$</span>vprodicc ),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">list</span>( <span class="at">talhao =</span> fustes<span class="sc">$</span>talhao, <span class="at">parcela =</span> fustes<span class="sc">$</span>parcela), sum )</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#[m³/parcela]  </span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>media <span class="ot">&lt;-</span> <span class="fu">mean</span>( parcela<span class="sc">$</span>vprod2 )</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#area da parcela  </span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>areaparc <span class="ot">&lt;-</span> <span class="fu">mean</span>( ( ( fustes<span class="sc">$</span>raio<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">*</span> pi ) )</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># m³/parc para m³/ha.</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>parcela<span class="sc">$</span>vprod2_ha <span class="ot">&lt;-</span> parcela<span class="sc">$</span>vprod2 <span class="sc">*</span> <span class="dv">10000</span><span class="sc">/</span>areaparc</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co">#para calcular o volume medio m³/ha  </span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>vmed <span class="ot">&lt;-</span> <span class="fu">mean</span>( parcela<span class="sc">$</span>vprod2_ha ) </span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="co">#variancia do volume m6/ha  </span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>vvar <span class="ot">&lt;-</span> <span class="fu">var</span>( parcela<span class="sc">$</span>vprod2_ha ) </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co">#desvio padrao do volume m?/ha </span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>vdesv <span class="ot">&lt;-</span> <span class="fu">sd</span>( parcela<span class="sc">$</span>vprod2_ha )</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">length</span>( parcela<span class="sc">$</span>vprod2_ha )</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>talhao <span class="ot">&lt;-</span> <span class="fu">subset</span>( fustes, <span class="fu">duplicated</span>( talhao ) <span class="sc">==</span> F,</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">c</span>(<span class="st">"talhao"</span>, <span class="st">"area"</span> ) ) </span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="co">#area da fazenda em ha</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>area_fazenda <span class="ot">&lt;-</span> <span class="fu">sum</span>(talhao<span class="sc">$</span>area)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="co">#numero de parcelas que cabem na fazenda </span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> area_fazenda <span class="sc">*</span> <span class="dv">10000</span> <span class="sc">/</span> areaparc </span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>erro_padrao_media <span class="ot">&lt;-</span> <span class="fu">sqrt</span>( vvar<span class="sc">/</span> n ) <span class="sc">*</span> ( <span class="dv">1</span> <span class="sc">-</span> n<span class="sc">/</span> N ) </span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a><span class="co">#erro do inv</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>erro_inv_unid <span class="ot">&lt;-</span> <span class="fu">qt</span>( <span class="fl">0.975</span>, n<span class="dv">-1</span>) <span class="sc">*</span> erro_padrao_media</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a><span class="co">#erro percentual</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>erro_inv_perc <span class="ot">&lt;-</span> erro_inv_unid<span class="sc">/</span>vmed <span class="sc">*</span> <span class="dv">100</span> </span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a><span class="co">#Intervalo de confiança em m³/ha</span></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round( vmed - erro_inv_unid, 2 ), " a ", round( vmed + erro_inv_unid, 2 ),"m³/ha com 95% de confiança (produto2)", sep = "" ) )</span></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round( ( vmed-erro_inv_unid ) *area_fazenda, 0 ),</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co">#           " a ",</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           round( ( vmed+erro_inv_unid ) * area_fazenda, 0 ),</span></span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/fazenda com 95% de confiança (produto 2)", sep = "" ) )</span></span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a><span class="co">#round( vmed * area_fazenda, 0 )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>De acordo com os dados obtidos no processamento do inventário, pode-se esperar uma produção média do produto 2 de 108568m³, com um intervalo de confiança de 105160m³ a 111975m³. Sendo o erro percentual amostral de 3.14%.</p>
+</section>
+<section id="c-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-total-com-casca-para-a-população." class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="c-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-total-com-casca-para-a-população."><span class="header-section-number">6.3</span> (c) Erro percentual amostral e intervalo de confiança do volume total com casca para a população.</h2>
+<div class="cell">
+<details>
+<summary>Mostrar código</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">##### vtcc --------------------------------------------------------------------</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>parcela <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(<span class="fu">list</span>( <span class="at">vtcc =</span> fustes<span class="sc">$</span>vti ),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">list</span>( <span class="at">talhao =</span> fustes<span class="sc">$</span>talhao, <span class="at">parcela =</span> fustes<span class="sc">$</span>parcela ), sum )</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#[m³/parcela]  </span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>media <span class="ot">&lt;-</span> <span class="fu">mean</span>( parcela<span class="sc">$</span>vtcc )</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">#area da parcela  </span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>areaparc <span class="ot">&lt;-</span> <span class="fu">mean</span>( ( ( fustes<span class="sc">$</span>raio<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">*</span> pi ) )</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># m³/parc para m³/ha.</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>parcela<span class="sc">$</span>vtcc_ha <span class="ot">&lt;-</span> parcela<span class="sc">$</span>vtcc <span class="sc">*</span> <span class="dv">10000</span><span class="sc">/</span>areaparc</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#para calcular o volume medio m³/ha  </span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>vmed <span class="ot">&lt;-</span> <span class="fu">mean</span>( parcela<span class="sc">$</span>vtcc_ha ) </span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#variancia do volume m6/ha  </span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>vvar <span class="ot">&lt;-</span> <span class="fu">var</span>( parcela<span class="sc">$</span>vtcc_ha ) </span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#desvio padrao do volume m³/ha </span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>vdesv <span class="ot">&lt;-</span> <span class="fu">sd</span>( parcela<span class="sc">$</span>vtcc_ha )</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">length</span>( parcela<span class="sc">$</span>vtcc_ha )</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>talhao <span class="ot">&lt;-</span> <span class="fu">subset</span>( fustes, <span class="fu">duplicated</span>( talhao ) <span class="sc">==</span> F,</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">c</span>(<span class="st">"talhao"</span>, <span class="st">"area"</span> ) ) </span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co">#area da fazenda em ha</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>area_fazenda <span class="ot">&lt;-</span> <span class="fu">sum</span>( talhao<span class="sc">$</span>area ) </span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co">#numero de parcelas que cabem na fazenda </span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> area_fazenda <span class="sc">*</span> <span class="dv">10000</span> <span class="sc">/</span> areaparc</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>erro_padrao_media <span class="ot">&lt;-</span> <span class="fu">sqrt</span>( vvar <span class="sc">/</span>n ) <span class="sc">*</span> ( <span class="dv">1</span> <span class="sc">-</span> n <span class="sc">/</span> N ) </span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="co">#erro do inv</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>erro_inv_unid <span class="ot">&lt;-</span> <span class="fu">qt</span>( <span class="fl">0.975</span>, n <span class="sc">-</span> <span class="dv">1</span> ) <span class="sc">*</span> erro_padrao_media </span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="co">#erro percentual</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>erro_inv_perc <span class="ot">&lt;-</span> erro_inv_unid <span class="sc">/</span> vmed <span class="sc">*</span> <span class="dv">100</span> </span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="co">#Intervalo de confiança em m³/ha</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round( vmed - erro_inv_unid, 2 )," a ",round( vmed + erro_inv_unid, 2 ),</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/ha com 95% de confiança para volume total com casca", sep = "" ) )</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round((vmed-erro_inv_unid)*area_fazenda,0),</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="co">#           " a ",</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           round((vmed+erro_inv_unid)*area_fazenda,0),</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/fazenda com 95% de confiança (volume total com casca da população)", sep = "" ) )</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a><span class="co">#round( vmed * area_fazenda, 0 )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>De acordo com os dados obtidos no processamento do inventário, pode-se esperar uma produção média do produto 3 de 116896m³, com um intervalo de confiança de 113425m³ a 120368m³. Com erro percentual amostral de 2.97%.</p>
+</section>
+</section>
+<section id="referências" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Referências</h1>
+<p>JÚNIOR, C. F. D. et al.&nbsp;Measure: sistema de coleta de informações para inventário florestal. <strong>Tecno-Lógica</strong>, 2020.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
