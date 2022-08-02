@@ -4,21 +4,21 @@ author: Gabriel de Freitas Pereira
 author-title: Autor
 number-sections: true
 highlight-style: pygments
+execute:
+  echo: false
 format:
-  html:
+  pdf:
     theme: lux
-    code-fold: true
-    code-summary: "Mostrar código"
     toc: true
-    toc-location: left
     toc-title: Sumário
+    table-title: Tabela
     number-sections: true
 editor_options: 
   markdown: 
     wrap: 72
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, echo = FALSE}
 library( cmrinvflor )
 library( openxlsx )
 library( timbeR )
@@ -52,6 +52,7 @@ dos seguintes produtos de forma independente:
 
 # Explorando dados da cubagem
 
+Podemos ter uma ideia do perfil das árvores cubadas por meio da relação entre os diâmetros e alturas:
 
 ```{r, include = TRUE}
 arv <- read.csv2( "cubagem.csv" )
@@ -59,6 +60,7 @@ arv$dap <- arv$cap / pi
 arv$disc <- arv$dicc - ( 2 * arv$espcasca )
 
 par( mfrow = c( 1, 2 ),
+     mai = c( 0.8, 1, 0.2, 0.2 ),
      pch = 20,
      bg = "#171717",
      col.axis = "white",
@@ -69,9 +71,7 @@ with( arv, plot( hi/ht, dicc, pch = 20 ) )
 with( arv, plot( hi, dicc, pch = 20 ) )
 ```
 
-::: column-margin
 Figura 1. Relação altura com o diâmetro com casca
-:::
 
 # Ajustes e predições dos modelos
 
@@ -94,11 +94,10 @@ A partir disso foram feitas as estimativas dos diâmetros sem casca e com casca 
 
 ## Ajuste Polinômio do 5º grau
 
+Função de Schöepfer (1966)
+
 ![](eq_5grau.PNG)
 
-::: column-margin
-Função de Schöepfer (1966)
-:::
 
 ```{r}
 #' #### Ajuste com casca
@@ -142,11 +141,10 @@ RMSE_kozsc <- arv %>%
 
 ## Ajuste Bi
 
+Função trigonométrica de forma variável de Bi (2000). 
+
 ![](eq_BI2000.PNG)
 
-::: column-margin
-Função trigonométrica de forma variável de Bi (2000). 
-:::
 
 ```{r}
 
@@ -204,11 +202,10 @@ RMSE_bisc <- arv %>%
 
 ## Ajuste Kozak
 
+Função de Kozak (2004)
+
 ![](eq_Kozak2004.PNG)
 
-::: column-margin
-Função de Kozak (2004)
-:::
 
 ```{r}
 #' #### Ajuste com casca
@@ -256,11 +253,10 @@ RMSE_kozsc <- arv %>%
 
 ## Ajuste Ormerod
 
+Função de Ormerod (1973)
+
 ![](eq_ormerod.PNG)
 
-::: column-margin
-Função de Ormerod (1973)
-:::
 
 ```{r}
 #' #### Ajuste com casca
@@ -318,9 +314,6 @@ RMSE_ormsc <- arv %>%
 
 : Erro padrão residual dos modelos testados
 
-::: column-margin
-Tabela 1.
-:::
 
 Quanto menor o erro padrão residual mais distante do ideal o modelo se encontra, ou seja, os resíduos estão mais distantes do valor real. Desse modo, comparando os modelos de forma **isolada a partir dessa métrica estatística** os modelos de Kozak e Bi obtiveram os melhores resultados para as estimativas de diâmetro com casca. Já para as estimativas de diâmetro sem casca, o modelo de Kozak foi o melhor. No entanto, vale ressaltar que uma métrica não é suficiente para escolhermos o melhor modelo de acordo com a nossa base, é necessário analisarmos outros fatores, que serão discutidos nesse relatório. 
 
@@ -340,9 +333,6 @@ Quanto menor o erro padrão residual mais distante do ideal o modelo se encontra
 
 : Raiz do erro quadrático médio dos modelos testados
 
-::: column-margin
-Tabela 2.
-:::
 
 A raiz quadrada do erro médio, RMSE (**Root Mean Squared Error**)
 é a raiz quadrada do erro médio, que nos auxilia a verificar a acurácia dos modelos, penalizando erros maiores, ou seja, é uma métrica mais sensível aos erros devido ao processo de quadratura que a produziu. Sendo assim, analisando os resultados dessa métrica quanto maior o RMSE pior será o modelo, logo, os modelos de Kozak e Bi novamente foram os melhores para as estimativas dos diâmetros com casca. E para as estimativas dos diâmetros sem casca, o modelo de Kozak também foi o melhor, se destacando entre os modelos testados para duas métricas estatísticas.
@@ -369,6 +359,7 @@ arv$resorm <- residuals( ormerod )
 arv$resormsc <- residuals( ormerodsc )
 
 par( mfrow = c( 2, 2 ),
+     mai = c( 0.7, 0.7, 0.2, 0.5  ),
      pch = 20,
      bg = "#171717",
      col.axis = "white",
@@ -382,22 +373,21 @@ fBasics::qqnormPlot( ( arv$reskozsc ), title = FALSE, main = "Kozak" )
 fBasics::qqnormPlot( ( arv$resormsc ), title = FALSE, main = "Ormerod" )
 ```
 
-::: column-margin
 Figura 2. Gráfico de quantis de todos modelos testados - Diâmetros com
 casca.
-:::
 
 ```{r}
 par( mfrow = c( 2, 2 ),
-pch = 20,
-bg = "#171717",
-col.axis = "white",
-col.lab = "white",
-col.main = "white",
-fg = "white" ) 
+     mai = c( 0.5, 0.7, 0.2, 0.05  ),
+     pch = 20,
+     bg = "#171717",
+     col.axis = "white",
+     col.lab = "white",
+     col.main = "white",
+     fg = "white" ) 
 
 graficos_res <- function( hi, res, modelo, xlab = "hi(m)" ) {
-  plot( hi, res, 
+  plot( hi, res,
         pch = 20, 
         ylim = c( -5, 5 ),
         ylab = "Resíduo (m³)", 
@@ -411,10 +401,9 @@ graficos_res( arv$hi, arv$reskoz, "Kozak" )
 graficos_res( arv$hi, arv$resorm, "Ormerod" )
 ```
 
-::: column-margin
 Figura 3. Gráfico de resíduos de todos modelos testados - Diâmetros com
 casca.
-:::
+
 
 Quando analisados os gráficos de resíduos (Figura 3) e os gráficos de
 normalidade dos resíduos QQ-plot (Figura 2), foi possível notar que os melhores modelos que apresentaram distribuições mais agrupadas em torno do zero, foram os modelos de Kozak e Bi. Sendo o modelo de Schöepfer aparentemente mais próximo do ideal nas ponteiras das árvores, no entanto esse modelo apresentou erros maiores (mais distantes de zero), principalmente na base das árvores, em relação aos modelos de Kozak e Bi.
@@ -423,6 +412,7 @@ normalidade dos resíduos QQ-plot (Figura 2), foi possível notar que os melhore
 ```{r}
 par( mfrow = c( 2, 2 ),
 pch = 20,
+mai = c( 0.7, 0.7, 0.2, 0.5  ),
 bg = "#171717",
 col.axis = "white",
 col.lab = "white",
@@ -435,14 +425,13 @@ fBasics::qqnormPlot((arv$reskozsc),title = FALSE, main = "Kozak")
 fBasics::qqnormPlot((arv$resormsc),title = FALSE, main = "Ormerod")
 ```
 
-::: column-margin
 Figura 4. Gráfico de quantis de todos modelos testados - Diâmetros sem
 casca.
-:::
 
 ```{r}
 par( mfrow = c( 2, 2 ),
 pch = 20,
+mai = c( 0.5, 0.7, 0.2, 0.05  ),
 bg = "#171717",
 col.axis = "white",
 col.lab = "white",
@@ -455,10 +444,8 @@ graficos_res( arv$hi, arv$reskozsc, "Kozak" )
 graficos_res( arv$hi, arv$resormsc, "Ormerod" )
 ```
 
-::: column-margin
 Figura 5. Gráfico de resíduos de todos modelos testados - Diâmetros sem
 casca.
-:::
 
 A partir da Figura 4, a qual representa o gráfico de quantis é possível observar que os resíduos  afirmam a normalidade. Além disso, com a análise dos gráficos de resíduos dispostos na Figura 5, foi possível notar que os melhores modelos, os quais apresentaram as melhores dispersões de resíduos devido às suas distribuições serem mais agrupadas em torno do zero, foram os modelos de Kozak e Schöepfer. Em contraponto, os demais modelos apresentaram erros maiores (mais distantes de zero), principalmente na base das árvores, apresentando alta heterogeneidade.
 
@@ -734,5 +721,6 @@ O volume total com casca apresentou maior potencial de produção segundo as est
 
 JÚNIOR, C. F. D. et al. Measure: sistema de coleta de informações para
 inventário florestal. **Tecno-Lógica**, 2020. 
+
 
 
