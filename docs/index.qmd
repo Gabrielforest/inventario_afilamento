@@ -462,6 +462,7 @@ casca.
 
 A partir da Figura 4, a qual representa o gráfico de quantis é possível observar que os resíduos  afirmam a normalidade. Além disso, com a análise dos gráficos de resíduos dispostos na Figura 3, foi possível notar que o melhor modelo, o qual apresentou a melhor dispersão de resíduos devido às suas distribuições serem mais agrupadas em torno do zero, foi o modelo de Kozak. Sendo os modelos de Kozak e Schöepfer, aparentemente mais próximos do ideal, tanto na base quanto nas ponteiras das árvores, quando comparado com os demais. Sendo assim, os demais modelos apresentaram erros maiores (mais distantes de zero), principalmente na base das árvores.
 
+Desse modo, com o que foi observado nas análises gráficas e estatísticas o melhor modelo testado, e que será usado para os cálculos dos produtos para produção madeireira é o modelo de Kozak (2004).
 
 # Cálculo dos produtos para produção madeireira
 
@@ -588,9 +589,9 @@ erro_inv_perc <- erro_inv_unid/vmed * 100
 
 
 #em m³/povoamento
-# cat(paste(round(( vmed - erro_inv_unid) * area_fazenda, 0 ),
+# cat(paste(round(( vmed - erro_inv_unid) * area_fazenda, 2 ),
 #           " a ",
-#           round(( vmed + erro_inv_unid) * area_fazenda, 0 ),
+#           round(( vmed + erro_inv_unid) * area_fazenda, 2 ),
 #           "m³/fazenda com 95% de confiança (produto 1)", sep = "" ) )
 
 #round(vmed*area_fazenda,0)
@@ -651,10 +652,10 @@ erro_inv_perc <- erro_inv_unid/vmed * 100
 
 
 #em m³/povoamento
-# cat(paste(round( ( vmed-erro_inv_unid ) *area_fazenda, 0 ),
-#           " a ",
-#           round( ( vmed+erro_inv_unid ) * area_fazenda, 0 ),
-#           "m³/fazenda com 95% de confiança (produto 2)", sep = "" ) )
+ # cat(paste(round( ( vmed-erro_inv_unid ) *area_fazenda, 2 ),
+ #          " a ",
+ #          round( ( vmed+erro_inv_unid ) * area_fazenda, 2 ),
+ #          "m³/fazenda com 95% de confiança (produto 2)", sep = "" ) )
 
 #round( vmed * area_fazenda, 0 )
 ```
@@ -712,9 +713,9 @@ erro_inv_perc <- erro_inv_unid / vmed * 100
 
 
 #em m³/povoamento
-# cat(paste(round((vmed-erro_inv_unid)*area_fazenda,0),
+# cat(paste(round((vmed-erro_inv_unid)*area_fazenda,2),
 #           " a ",
-#           round((vmed+erro_inv_unid)*area_fazenda,0),
+#           round((vmed+erro_inv_unid)*area_fazenda,2),
 #           "m³/fazenda com 95% de confiança (volume total com casca da população)", sep = "" ) )
 
 

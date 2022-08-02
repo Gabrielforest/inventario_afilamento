@@ -626,6 +626,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="no-row-height column-margin column-container"><div class="">
 <p>Figura 5. Gráfico de resíduos de todos modelos testados - Diâmetros sem casca.</p>
 </div></div><p>A partir da Figura 4, a qual representa o gráfico de quantis é possível observar que os resíduos afirmam a normalidade. Além disso, com a análise dos gráficos de resíduos dispostos na Figura 3, foi possível notar que o melhor modelo, o qual apresentou a melhor dispersão de resíduos devido às suas distribuições serem mais agrupadas em torno do zero, foi o modelo de Kozak. Sendo os modelos de Kozak e Schöepfer, aparentemente mais próximos do ideal, tanto na base quanto nas ponteiras das árvores, quando comparado com os demais. Sendo assim, os demais modelos apresentaram erros maiores (mais distantes de zero), principalmente na base das árvores.</p>
+<p>Desse modo, com o que foi observado nas análises gráficas e estatísticas o melhor modelo testado, e que será usado para os cálculos dos produtos para produção madeireira é o modelo de Kozak (2004).</p>
 </section>
 </section>
 <section id="cálculo-dos-produtos-para-produção-madeireira" class="level1" data-number="6">
@@ -757,9 +758,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
-<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round(( vmed - erro_inv_unid) * area_fazenda, 0 ),</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round(( vmed - erro_inv_unid) * area_fazenda, 2 ),</span></span>
 <span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           " a ",</span></span>
-<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           round(( vmed + erro_inv_unid) * area_fazenda, 0 ),</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           round(( vmed + erro_inv_unid) * area_fazenda, 2 ),</span></span>
 <span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/fazenda com 95% de confiança (produto 1)", sep = "" ) )</span></span>
 <span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="co">#round(vmed*area_fazenda,0)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -818,10 +819,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
-<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round( ( vmed-erro_inv_unid ) *area_fazenda, 0 ),</span></span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co">#           " a ",</span></span>
-<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           round( ( vmed+erro_inv_unid ) * area_fazenda, 0 ),</span></span>
-<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/fazenda com 95% de confiança (produto 2)", sep = "" ) )</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a> <span class="co"># cat(paste(round( ( vmed-erro_inv_unid ) *area_fazenda, 2 ),</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a> <span class="co">#          " a ",</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a> <span class="co">#          round( ( vmed+erro_inv_unid ) * area_fazenda, 2 ),</span></span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a> <span class="co">#          "m³/fazenda com 95% de confiança (produto 2)", sep = "" ) )</span></span>
 <span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a><span class="co">#round( vmed * area_fazenda, 0 )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -879,9 +880,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round((vmed-erro_inv_unid)*area_fazenda,0),</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round((vmed-erro_inv_unid)*area_fazenda,2),</span></span>
 <span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="co">#           " a ",</span></span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           round((vmed+erro_inv_unid)*area_fazenda,0),</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           round((vmed+erro_inv_unid)*area_fazenda,2),</span></span>
 <span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/fazenda com 95% de confiança (volume total com casca da população)", sep = "" ) )</span></span>
 <span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a></span>
