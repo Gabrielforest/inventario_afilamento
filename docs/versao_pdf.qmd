@@ -359,7 +359,7 @@ RMSE_ormsc <- arv %>%
  p             
  $$            |            |             |  8.456264e-21 |           |
 
-: Parâmetros estimados para equações de afilamento (produto sem casca)
+: Parâmetros estimados para equações de afilamento (produto com casca)
 
 | Coeficientes | Shöepfer   | Bi           | Kozak         | Ormerod   |
 |--------------|------------|--------------|---------------|-----------|
