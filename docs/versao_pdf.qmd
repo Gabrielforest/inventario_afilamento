@@ -418,7 +418,7 @@ RMSE_ormsc <- arv %>%
 
 : Erro padrão residual dos modelos testados
 
-Quanto menor o erro padrão residual mais distante do ideal o modelo se
+Quanto maior o erro padrão residual mais distante do ideal o modelo se
 encontra, ou seja, os resíduos estão mais distantes do valor real. Desse
 modo, comparando os modelos de forma **isolada a partir dessa métrica
 estatística** os modelos de Kozak e Bi obtiveram os melhores resultados
@@ -847,7 +847,7 @@ confiança de 113425m³ a 120368m³. Com erro percentual amostral de 2.97%.
 # Conclusão
 
 O volume total com casca apresentou maior potencial de produção segundo
-as estimativas presentes neste relatório.
+as estimativas presentes neste relatório utilizando a equação de afilamento Kozak (2004).
 
 # Referências
 
