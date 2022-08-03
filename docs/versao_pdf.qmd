@@ -1,5 +1,5 @@
 ---
-title: "Processamento de um inventário florestal utilizando funções de afilamento"
+title: "Processamento de um inventário florestal"
 author: Gabriel de Freitas Pereira
 author-title: Autor
 number-sections: true
@@ -31,28 +31,51 @@ library( minpack.lm )
 Um inventário florestal é uma prática que busca a quantificação, e por
 conseguinte, a qualificação das florestas em diferentes aspectos, como a
 produção de madeira entre outros possíveis produtos, através do uso de
-técnicas estatísticas de amostragem. Sendo assim, o inventário visa obter o
-máximo de informações de uma floresta com a máxima precisão e o mínimo
-custo. Esses três fatores desempenham papel importante no planejamento de
-um inventário florestal (JÚNIOR et al., 2020).
-
+técnicas estatísticas de amostragem. Sendo assim, o inventário visa
+obter o máximo de informações de uma floresta com a máxima precisão e o
+mínimo custo. Esses três fatores desempenham papel importante no
+planejamento de um inventário florestal (JÚNIOR et al., 2020).
 
 # Objetivo
 
-Realizar o inventário florestal de um povoamento com um cultivar de *Eucalyptus grandis*
-W. Hill ex Maiden x *Eucalyptus urophylla* S. T. Blake na região noroeste do Estado de Minas Gerais, para a estimar a produção madeireira 
-dos seguintes produtos de forma independente:
+Realizar o inventário florestal de um povoamento com um cultivar de
+*Eucalyptus grandis* W. Hill ex Maiden x *Eucalyptus urophylla* S. T.
+Blake na região noroeste do Estado de Minas Gerais, para a estimar a
+produção madeireira dos seguintes produtos de forma independente:
 
-1. PRODUTO 1: diâmetro mínimo de 5, 5cm sem casca e comprimento de tora de 5, 6m.
+1.  PRODUTO 1: diâmetro mínimo de 5, 5cm sem casca e comprimento de tora
+    de 5, 6m.
 
-2. PRODUTO 2: diâmetro mínimo de 7, 5cm com casca e comprimento de tora de 3, 3m.
+2.  PRODUTO 2: diâmetro mínimo de 7, 5cm com casca e comprimento de tora
+    de 3, 3m.
 
-3. VOLUME TOTAL COM CASCA.
+3.  VOLUME TOTAL COM CASCA.
 
+# Coleta de dados e amostragem
+
+Inicialmente, os primeiros aspectos da área foram fornecidos pelo
+proprietário da área e foram analisadas presencialmente na fazenda, e
+essas informações eram sobre o espaçamento, tipo de solo, relevo,
+presença de patógenos, umidade do solo, entre outras informações gerais.
+Depois desse processo, os dados de diâmetro à altura do peito (DAP)
+foram coletados a 1,3 m do solo, através do uso de uma fita métrica no
+sentido horizontal em relação ao solo. Quando as árvores estavam em
+terreno inclinado, a medição foi realizada no ponto mais elevado e no
+caso das árvores inclinadas a fita métrica foi colocada no sentido
+perpendicular ao eixo do tronco da árvore. A altura total foi medida
+através de um hipsômetro Suunto. As informações adquiridas foram
+armazenadas em tablets, assim como o registro de informações como a
+localização e identificação da área e locais de acesso.
+
+Com isso, o procedimento de amostragem que foi adotado na realização do
+inventário após a análise dos dados foi a amostragem casual simples com parcelas circulares.
+Esse tipo de amostragem é um método utilizado em populações homogêneas e
+foi escolhido, justamente, por conta dessa característica do povoamento.
 
 # Explorando dados da cubagem
 
-Podemos ter uma ideia do perfil das árvores cubadas por meio da relação entre os diâmetros e alturas:
+Podemos ter uma ideia do perfil das árvores cubadas por meio da relação
+entre os diâmetros e alturas:
 
 ```{r, include = TRUE}
 arv <- read.csv2( "cubagem.csv" )
@@ -87,10 +110,11 @@ $d$ = diâmetro à altura do peito;
 
 $h$ = altura da árvore.
 
-$p$ = primeiro ponto de inflexão calculado no modelo segmentado de Max & Burkhart (1976).
+$p$ = primeiro ponto de inflexão calculado no modelo segmentado de Max &
+Burkhart (1976).
 
-A partir disso foram feitas as estimativas dos diâmetros sem casca e com casca para cada modelo. 
-
+A partir disso foram feitas as estimativas dos diâmetros sem casca e com
+casca para cada modelo.
 
 ## Ajuste Polinômio do 5º grau
 
@@ -98,40 +122,46 @@ Função de Schöepfer (1966)
 
 ![](eq_5grau.PNG)
 
-
 ```{r}
-#' #### Ajuste com casca
+#' #### Ajuste com casca ------------------------------
 
 #' ##### Ajuste linear
-arv$hih <- arv$hi / arv$ht
-arv$did <- arv$dicc / arv$dap
+ajlin <- lm( formula = "I(dicc/dap)~I(hi/ht)+I((hi/ht)^2)+I((hi/ht)^3)+I((hi/ht)^4)+I((hi/ht)^5)", data = arv )
+bs <- coef( ajlin )
 
-ajlin <- lm( did ~ hih + I( hih^2 ) + I( hih^3 )  + I( hih^4 ) + I( hih^5 ), arv )
+#' ##### Ajuste não-linear
+ajnlin <- nls( formula = "dicc~dap*(b0+b1*(hi/ht)+b2*((hi/ht)^2)+b3*((hi/ht)^3)+b4*((hi/ht)^4)+b5*((hi/ht)^5))",
+               data = arv,
+               start = list( b0 = bs[1], b1 = bs[2], b2 = bs[3], b3 = bs[4], b4 = bs[5], b5 = bs[6] ) )
 
 #' ##### Erro padrão residual
-syx <- summary( ajlin )$sigma
-syxperc <- syx/mean( arv$dicc ) * 100 * mean( arv$dap )
+syx <- summary( ajnlin )$sigma
+syxperc <- syx/mean( arv$dicc ) * 100
 
 #' ##### RMSE 
-arv$diccest5grau <- predict( ajlin ) * arv$dap
+arv$diccest5grau <- predict( ajnlin )
 RMSE_kozcc <- arv %>% 
   summarise( RMSE = sqrt( sum ( ( diccest5grau - dicc )^2 ) / mean( diccest5grau ) ) ) %>% 
   pull( RMSE ) %>% 
   round( 2 )
 
-#' #### Ajuste sem casca 
+#' #### Ajuste sem casca --------------------------
 
 #' ##### Ajuste linear
-arv$didsc <- arv$disc / arv$dap
+ajlinsc <- lm(formula = "I(disc/dap)~I(hi/ht)+I((hi/ht)^2)+I((hi/ht)^3)+I((hi/ht)^4)+I((hi/ht)^5)", data = arv )
+bsn <- coef( ajlinsc )
 
-ajlinsc <- lm( didsc ~ hih + I( hih^2 ) + I( hih^3 )  + I( hih^4 ) + I( hih^5 ), arv )
+#' ##### Ajuste não linear
+ajnlinsc <- nls( "disc~dap*(b0+b1*(hi/ht)+b2*((hi/ht)^2)+b3*((hi/ht)^3)+b4*((hi/ht)^4)+b5*((hi/ht)^5))",
+                 data = arv,
+                 start = list( b0 = bsn[1], b1 = bsn[2], b2 = bsn[3], b3 = bsn[4], b4 = bsn[5], b5 = bsn[6] ) )
 
 #' ##### Erro padrão residual
-syxsc <- summary( ajlinsc )$sigma
-syxpercsc <- syxsc/mean( arv$disc ) * 100 * mean( arv$dap )
+syxsc <- summary( ajnlinsc )$sigma
+syxpercsc <- syxsc/mean( arv$disc ) * 100
 
 #' ##### RMSE 
-arv$discest5grau <- predict( ajlinsc ) * arv$dap
+arv$discest5grau <- predict( ajnlinsc )
 RMSE_kozsc <- arv %>% 
   summarise( RMSE = sqrt( sum ( ( discest5grau - disc )^2 ) / mean( discest5grau ) ) ) %>% 
   pull( RMSE ) %>% 
@@ -139,12 +169,12 @@ RMSE_kozsc <- arv %>%
 
 ```
 
+
 ## Ajuste Bi
 
-Função trigonométrica de forma variável de Bi (2000). 
+Função trigonométrica de forma variável de Bi (2000).
 
 ![](eq_BI2000.PNG)
-
 
 ```{r}
 
@@ -206,7 +236,6 @@ Função de Kozak (2004)
 
 ![](eq_Kozak2004.PNG)
 
-
 ```{r}
 #' #### Ajuste com casca
 
@@ -257,7 +286,6 @@ Função de Ormerod (1973)
 
 ![](eq_ormerod.PNG)
 
-
 ```{r}
 #' #### Ajuste com casca
 
@@ -292,50 +320,140 @@ RMSE_ormsc <- arv %>%
   summarise( RMSE = sqrt( sum ( ( discestorm - disc )^2 ) / mean( discestorm ) ) ) %>% 
   pull( RMSE ) %>% 
   round( 2 )
-
 ```
+
+## Parâmetros estimados
+
+
+
+| Coeficientes | Shöepfer   | Bi          | Kozak         | Ormerod   |
+|--------------|------------|-------------|---------------|-----------|
+| $$           
+ \beta_0       
+ $$            |  1.149711  | 1.16381263  | 1.329713e+00  | 0.6158262 |
+| $$           
+ \beta_1       
+ $$            | -2.893042  | -0.42071582 | 1.031917e+00  |           |
+| $$           
+ \beta_2       
+ $$            | 12.800539  | -0.06467247 | 4.239088e-02  |           |
+| $$           
+ \beta_3       
+ $$            | -31.094415 | -0.50058019 | 2.584386e-01  |           |
+| $$           
+ \beta_4       
+ $$            | 33.312735  | -0.00518156 | -2.210635e-0  |           |
+| $$           
+ \beta_5       
+ $$            | -13.298716 | 0.10121225  | 6.119496e-01  |           |
+| $$           
+ \beta_6       
+ $$            |            | -0.05350887 | 5.046467e-03  |           |
+| $$           
+ \beta_7       
+ $$            |            |             | 6.336675e-02  |           |
+| $$           
+ \beta_8       
+ $$            |            |             | -3.252574e-01 |           |
+| $$           
+ p             
+ $$            |            |             |  8.456264e-21 |           |
+
+: Parâmetros estimados para equações de afilamento (produto sem casca)
+
+| Coeficientes | Shöepfer   | Bi           | Kozak         | Ormerod   |
+|--------------|------------|--------------|---------------|-----------|
+| $$           
+ \beta_0       
+ $$            | 1.028663   | -0.663415073 | 1.063137e+00  | 0.6899774 |
+| $$           
+ \beta_1       
+ $$            | -2.182156  | 0.529971731  | 1.043145e+00  |           |
+| $$           
+ \beta_2       
+ $$            | 9.929448   | 0.120093982  | 6.433694e-02  |           |
+| $$           
+ \beta_3       
+ $$            | -25.073011 | 0.441966710  | 2.806756e-01  |           |
+| $$           
+ \beta_4       
+ $$            | 27.220670  | -0.003953917 | -2.138182e-01 |           |
+| $$           
+ \beta_5       
+ $$            | -10.947382 | 0.088665656  | 5.908886e-01  |           |
+| $$           
+ \beta_6       
+ $$            |            | -0.055853500 | -1.943536e-01 |           |
+| $$           
+ \beta_7       
+ $$            |            |              | 7.130096e-02  |           |
+| $$           
+ \beta_8       
+ $$            |            |              | -4.850617e-01 |           |
+| $$           
+ p             
+ $$            |            |              | 1.830266e-18  |           |
+
+: Parâmetros estimados para equações de afilamento (produto sem casca)
+
 
 # Análise dos modelos
 
 ## Erro padrão residual
 
-+---------------------+------------------------+-----------------------+
-| Modelos             | Erro Padrão Residual   | Erro Padrão Residual  |
-|                     | (% com casca)          | (% sem casca)         |
-+=====================+========================+=======================+
-| Schöepfer (1966)    | 5.171111               | 5.215619              |
-+---------------------+------------------------+-----------------------+
-| Bi (2000)           | 4.239943               | 6.557174              |
-+---------------------+------------------------+-----------------------+
-| Kozak (2004)        | 4.238015               | 4.393806              |
-+---------------------+------------------------+-----------------------+
-| Ormerod (1973)      | 6.655004               | 7.410827              |
-+---------------------+------------------------+-----------------------+
++----------------+-------------------+-------------------+
+| Modelos        | Erro Padrão       | Erro Padrão       |
+|                | Residual (% com   | Residual (% sem   |
+|                | casca)            | casca)            |
++================+===================+===================+
+| Schöepfer      | 4.744527          | 4.737539          |
+| (1966)         |                   |                   |
++----------------+-------------------+-------------------+
+| Bi (2000)      | 4.239943          | 6.557174          |
++----------------+-------------------+-------------------+
+| Kozak (2004)   | 4.238015          | 4.393806          |
++----------------+-------------------+-------------------+
+| Ormerod (1973) | 6.655004          | 7.410827          |
++----------------+-------------------+-------------------+
 
 : Erro padrão residual dos modelos testados
 
-
-Quanto menor o erro padrão residual mais distante do ideal o modelo se encontra, ou seja, os resíduos estão mais distantes do valor real. Desse modo, comparando os modelos de forma **isolada a partir dessa métrica estatística** os modelos de Kozak e Bi obtiveram os melhores resultados para as estimativas de diâmetro com casca. Já para as estimativas de diâmetro sem casca, o modelo de Kozak foi o melhor. No entanto, vale ressaltar que uma métrica não é suficiente para escolhermos o melhor modelo de acordo com a nossa base, é necessário analisarmos outros fatores, que serão discutidos nesse relatório. 
+Quanto menor o erro padrão residual mais distante do ideal o modelo se
+encontra, ou seja, os resíduos estão mais distantes do valor real. Desse
+modo, comparando os modelos de forma **isolada a partir dessa métrica
+estatística** os modelos de Kozak e Bi obtiveram os melhores resultados
+para as estimativas de diâmetro com casca. Já para as estimativas de
+diâmetro sem casca, o modelo de Kozak foi o melhor. No entanto, vale
+ressaltar que uma métrica não é suficiente para escolhermos o melhor
+modelo de acordo com a nossa base, é necessário analisarmos outros
+fatores, que serão discutidos nesse relatório.
 
 ## Raiz do erro quadrático médio
 
-+---------------------+------------------------+-----------------------+
-| Modelos             |    RMSE (com casca)    |    RMSE (sem casca)   |
-+=====================+========================+=======================+
-| Schöepfer (1966)    | 8.51                   | 8.18                  |
-+---------------------+------------------------+-----------------------+
-| Bi (2000)           | 7.49                   | 11.05                 |
-+---------------------+------------------------+-----------------------+
-| Kozak (2004)        | 7.47                   | 7.47                  |
-+---------------------+------------------------+-----------------------+
-| Ormerod (1973)      | 11.84                  | 12.47                 |
-+---------------------+------------------------+-----------------------+
++----------------+-------------------+-------------------+
+| Modelos        | RMSE (com casca)  | RMSE (sem casca)  |
++================+===================+===================+
+| Schöepfer      | 8.39              | 8.07              |
+| (1966)         |                   |                   |
++----------------+-------------------+-------------------+
+| Bi (2000)      | 7.49              | 11.05             |
++----------------+-------------------+-------------------+
+| Kozak (2004)   | 7.47              | 7.47              |
++----------------+-------------------+-------------------+
+| Ormerod (1973) | 11.84             | 12.47             |
++----------------+-------------------+-------------------+
 
 : Raiz do erro quadrático médio dos modelos testados
 
-
-A raiz quadrada do erro médio, RMSE (**Root Mean Squared Error**)
-é a raiz quadrada do erro médio, que nos auxilia a verificar a acurácia dos modelos, penalizando erros maiores, ou seja, é uma métrica mais sensível aos erros devido ao processo de quadratura que a produziu. Sendo assim, analisando os resultados dessa métrica quanto maior o RMSE pior será o modelo, logo, os modelos de Kozak e Bi novamente foram os melhores para as estimativas dos diâmetros com casca. E para as estimativas dos diâmetros sem casca, o modelo de Kozak também foi o melhor, se destacando entre os modelos testados para duas métricas estatísticas.
+A raiz quadrada do erro médio, RMSE (**Root Mean Squared Error**) é a
+raiz quadrada do erro médio, que nos auxilia a verificar a acurácia dos
+modelos, penalizando erros maiores, ou seja, é uma métrica mais sensível
+aos erros devido ao processo de quadratura que a produziu. Sendo assim,
+analisando os resultados dessa métrica quanto maior o RMSE pior será o
+modelo, logo, os modelos de Kozak e Bi novamente foram os melhores para
+as estimativas dos diâmetros com casca. E para as estimativas dos
+diâmetros sem casca, o modelo de Kozak também foi o melhor, se
+destacando entre os modelos testados para duas métricas estatísticas.
 
 ## Análise Gráfica
 
@@ -343,8 +461,8 @@ A raiz quadrada do erro médio, RMSE (**Root Mean Squared Error**)
 ## Resíduos
 
 #' ##### 5° grau
-arv$res5grau <- residuals( ajlin ) * arv$dap
-arv$res5grausc <- residuals( ajlinsc ) * arv$dap
+arv$res5grau <- residuals( ajnlin )
+arv$res5grausc <- residuals( ajnlinsc ) 
 
 #' ##### methol
 arv$resbi <- residuals( bi )
@@ -404,10 +522,14 @@ graficos_res( arv$hi, arv$resorm, "Ormerod" )
 Figura 3. Gráfico de resíduos de todos modelos testados - Diâmetros com
 casca.
 
-
 Quando analisados os gráficos de resíduos (Figura 3) e os gráficos de
-normalidade dos resíduos QQ-plot (Figura 2), foi possível notar que os melhores modelos que apresentaram distribuições mais agrupadas em torno do zero, foram os modelos de Kozak e Bi. Sendo o modelo de Schöepfer aparentemente mais próximo do ideal nas ponteiras das árvores, no entanto esse modelo apresentou erros maiores (mais distantes de zero), principalmente na base das árvores, em relação aos modelos de Kozak e Bi.
-
+normalidade dos resíduos QQ-plot (Figura 2), foi possível notar que os
+melhores modelos que apresentaram distribuições mais agrupadas em torno
+do zero, foram os modelos de Kozak e Bi. Sendo o modelo de Schöepfer
+aparentemente mais próximo do ideal nas ponteiras das árvores, no
+entanto esse modelo apresentou erros maiores (mais distantes de zero),
+principalmente na base das árvores, em relação aos modelos de Kozak e
+Bi.
 
 ```{r}
 par( mfrow = c( 2, 2 ),
@@ -447,9 +569,18 @@ graficos_res( arv$hi, arv$resormsc, "Ormerod" )
 Figura 5. Gráfico de resíduos de todos modelos testados - Diâmetros sem
 casca.
 
-A partir da Figura 4, a qual representa o gráfico de quantis é possível observar que os resíduos  afirmam a normalidade. Além disso, com a análise dos gráficos de resíduos dispostos na Figura 5, foi possível notar que os melhores modelos, os quais apresentaram as melhores dispersões de resíduos devido às suas distribuições serem mais agrupadas em torno do zero, foram os modelos de Kozak e Schöepfer. Em contraponto, os demais modelos apresentaram erros maiores (mais distantes de zero), principalmente na base das árvores, apresentando alta heterogeneidade.
+A partir da Figura 4, a qual representa o gráfico de quantis é possível
+observar que os resíduos afirmam a normalidade. Além disso, com a
+análise dos gráficos de resíduos dispostos na Figura 5, foi possível
+notar que os melhores modelos, os quais apresentaram as melhores
+dispersões de resíduos devido às suas distribuições serem mais agrupadas
+em torno do zero, foram os modelos de Kozak e Schöepfer. Em contraponto,
+os demais modelos apresentaram erros maiores (mais distantes de zero),
+principalmente na base das árvores, apresentando alta heterogeneidade.
 
-Desse modo, com o que foi observado nas análises gráficas e estatísticas o melhor modelo testado, e que será usado para os cálculos dos produtos para produção madeireira é o modelo de Kozak (2004).
+Desse modo, com o que foi observado nas análises gráficas e estatísticas
+o melhor modelo testado, e que será usado para os cálculos dos produtos
+para produção madeireira é o modelo de Kozak (2004).
 
 # Cálculo dos produtos para produção madeireira
 
@@ -584,13 +715,12 @@ erro_inv_perc <- erro_inv_unid/vmed * 100
 #round(vmed*area_fazenda,0)
 ```
 
-De acordo com os dados obtidos no processamento do inventário,
-pode-se esperar uma produção média do produto 1 de 98104m³, com um
-intervalo de confiança de 95115m³ a 101094m³. Sendo o erro percentual amostral de 3.05%.
-
+De acordo com os dados obtidos no processamento do inventário, pode-se
+esperar uma produção média do produto 1 de 98104m³, com um intervalo de
+confiança de 95115m³ a 101094m³. Sendo o erro percentual amostral de
+3.05%.
 
 ## (b) Erro percentual amostral e intervalo de confiança do volume do produto 2 (com casca) para a população.
-
 
 ```{r}
 ##### produto 2 --------------------------------------------------------------------
@@ -647,9 +777,10 @@ erro_inv_perc <- erro_inv_unid/vmed * 100
 #round( vmed * area_fazenda, 0 )
 ```
 
-De acordo com os dados obtidos no processamento do inventário,
-pode-se esperar uma produção média do produto 2 de 108568m³, com um
-intervalo de confiança de 105160m³ a 111975m³. Sendo o erro percentual amostral de 3.14%.
+De acordo com os dados obtidos no processamento do inventário, pode-se
+esperar uma produção média do produto 2 de 108568m³, com um intervalo de
+confiança de 105160m³ a 111975m³. Sendo o erro percentual amostral de
+3.14%.
 
 ## (c) Erro percentual amostral e intervalo de confiança do volume total com casca para a população.
 
@@ -709,18 +840,16 @@ erro_inv_perc <- erro_inv_unid / vmed * 100
 #round( vmed * area_fazenda, 0 )
 ```
 
-De acordo com os dados obtidos no processamento do inventário,
-pode-se esperar uma produção média do produto 3 de 116896m³, com um
-intervalo de confiança de 113425m³ a 120368m³. Com erro percentual amostral de 2.97%.
+De acordo com os dados obtidos no processamento do inventário, pode-se
+esperar uma produção média do produto 3 de 116896m³, com um intervalo de
+confiança de 113425m³ a 120368m³. Com erro percentual amostral de 2.97%.
 
 # Conclusão
 
-O volume total com casca apresentou maior potencial de produção segundo as estimativas presentes neste relatório. 
+O volume total com casca apresentou maior potencial de produção segundo
+as estimativas presentes neste relatório.
 
 # Referências
 
 JÚNIOR, C. F. D. et al. Measure: sistema de coleta de informações para
-inventário florestal. **Tecno-Lógica**, 2020. 
-
-
-
+inventário florestal. **Tecno-Lógica**, 2020.
