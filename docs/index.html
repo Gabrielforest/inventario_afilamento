@@ -230,7 +230,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>diccest5grau <span class="ot">&lt;-</span> <span class="fu">predict</span>( ajlin ) <span class="sc">*</span> arv<span class="sc">$</span>dap</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>RMSE_kozcc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>RMSE_policc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( diccest5grau <span class="sc">-</span> dicc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( diccest5grau ) ) ) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span>
@@ -248,7 +248,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">#' ##### RMSE </span></span>
 <span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>arv<span class="sc">$</span>discest5grau <span class="ot">&lt;-</span> <span class="fu">predict</span>( ajlinsc ) <span class="sc">*</span> arv<span class="sc">$</span>dap</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>RMSE_kozsc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>RMSE_polisc <span class="ot">&lt;-</span> arv <span class="sc">%&gt;%</span> </span>
 <span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="at">RMSE =</span> <span class="fu">sqrt</span>( <span class="fu">sum</span> ( ( discest5grau <span class="sc">-</span> disc )<span class="sc">^</span><span class="dv">2</span> ) <span class="sc">/</span> <span class="fu">mean</span>( discest5grau ) ) ) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>( RMSE ) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>( <span class="dv">2</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -421,9 +421,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <table class="table">
 <caption>Erro padrão residual dos modelos testados</caption>
 <colgroup>
-<col style="width: 30%">
-<col style="width: 34%">
-<col style="width: 34%">
+<col style="width: 20%">
+<col style="width: 40%">
+<col style="width: 40%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -435,23 +435,23 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <tbody>
 <tr class="odd">
 <td>Schöepfer (1966)</td>
-<td>5.171111</td>
-<td>5.215619</td>
+<td>5.17</td>
+<td>5.22</td>
 </tr>
 <tr class="even">
 <td>Bi (2000)</td>
-<td>4.239943</td>
-<td>6.557174</td>
+<td>4.24</td>
+<td>6.56</td>
 </tr>
 <tr class="odd">
 <td>Kozak (2004)</td>
-<td>4.238015</td>
-<td>4.393806</td>
+<td>4.24</td>
+<td>4.39</td>
 </tr>
 <tr class="even">
 <td>Ormerod (1973)</td>
-<td>6.655004</td>
-<td>7.410827</td>
+<td>6.66</td>
+<td>7.41</td>
 </tr>
 </tbody>
 </table>
@@ -464,11 +464,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 data-number="5.2" class="anchored" data-anchor-id="raiz-do-erro-quadrático-médio"><span class="header-section-number">5.2</span> Raiz do erro quadrático médio</h2>
 <table class="table">
 <caption>Raiz do erro quadrático médio dos modelos testados</caption>
-<colgroup>
-<col style="width: 30%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Modelos</th>
@@ -750,24 +745,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>erro_inv_unid <span class="ot">&lt;-</span> <span class="fu">qt</span>( <span class="fl">0.975</span>, n <span class="sc">-</span> <span class="dv">1</span> ) <span class="sc">*</span> erro_padrao_media </span>
 <span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="co">#erro percentual</span></span>
-<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>erro_inv_perc <span class="ot">&lt;-</span> erro_inv_unid<span class="sc">/</span>vmed <span class="sc">*</span> <span class="dv">100</span> </span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>erro_inv_perc_prod1 <span class="ot">&lt;-</span> erro_inv_unid<span class="sc">/</span>vmed <span class="sc">*</span> <span class="dv">100</span> </span>
 <span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="co">#Intervalo de confiança em m³/ha</span></span>
 <span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round(vmed-erro_inv_unid,2)," a ", round( vmed+erro_inv_unid, 2 ),"m³/ha com 95% de confiança (produto 1)", sep = "" ) )</span></span>
 <span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
-<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round(( vmed - erro_inv_unid) * area_fazenda, 2 ),</span></span>
-<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           " a ",</span></span>
-<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           round(( vmed + erro_inv_unid) * area_fazenda, 2 ),</span></span>
-<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/fazenda com 95% de confiança (produto 1)", sep = "" ) )</span></span>
-<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="co">#round(vmed*area_fazenda,0)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>prod1_inf <span class="ot">&lt;-</span> <span class="fu">round</span>(( vmed <span class="sc">-</span> erro_inv_unid) <span class="sc">*</span> area_fazenda, <span class="dv">2</span> )</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>prod1_sup <span class="ot">&lt;-</span> <span class="fu">round</span>(( vmed <span class="sc">+</span> erro_inv_unid) <span class="sc">*</span> area_fazenda, <span class="dv">2</span> )</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>prod1_media <span class="ot">&lt;-</span> <span class="fu">round</span>( vmed <span class="sc">*</span> area_fazenda, <span class="dv">0</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>De acordo com os dados obtidos no processamento do inventário, pode-se esperar uma produção média do produto 1 de 98104m³, com um intervalo de confiança de 95115m³ a 101094m³. Sendo o erro percentual amostral de 3.05%.</p>
+<p>De acordo com os dados obtidos no processamento do inventário, pode-se esperar uma produção média do produto 1 de 98104m³, com um intervalo de confiança de 95115m³ a 101093m³. Sendo o erro percentual amostral de 3.05%.</p>
 </section>
 <section id="b-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-2-com-casca-para-a-população." class="level2" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="b-erro-percentual-amostral-e-intervalo-de-confiança-do-volume-do-produto-2-com-casca-para-a-população."><span class="header-section-number">6.2</span> (b) Erro percentual amostral e intervalo de confiança do volume do produto 2 (com casca) para a população.</h2>
@@ -811,21 +800,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>erro_inv_unid <span class="ot">&lt;-</span> <span class="fu">qt</span>( <span class="fl">0.975</span>, n<span class="dv">-1</span>) <span class="sc">*</span> erro_padrao_media</span>
 <span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a><span class="co">#erro percentual</span></span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>erro_inv_perc <span class="ot">&lt;-</span> erro_inv_unid<span class="sc">/</span>vmed <span class="sc">*</span> <span class="dv">100</span> </span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>erro_inv_perc_prod2 <span class="ot">&lt;-</span> erro_inv_unid<span class="sc">/</span>vmed <span class="sc">*</span> <span class="dv">100</span> </span>
 <span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a><span class="co">#Intervalo de confiança em m³/ha</span></span>
 <span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round( vmed - erro_inv_unid, 2 ), " a ", round( vmed + erro_inv_unid, 2 ),"m³/ha com 95% de confiança (produto2)", sep = "" ) )</span></span>
 <span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
-<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a> <span class="co"># cat(paste(round( ( vmed-erro_inv_unid ) *area_fazenda, 2 ),</span></span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a> <span class="co">#          " a ",</span></span>
-<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a> <span class="co">#          round( ( vmed+erro_inv_unid ) * area_fazenda, 2 ),</span></span>
-<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a> <span class="co">#          "m³/fazenda com 95% de confiança (produto 2)", sep = "" ) )</span></span>
-<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a><span class="co">#round( vmed * area_fazenda, 0 )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>prod2_inf <span class="ot">&lt;-</span> <span class="fu">round</span>(( vmed <span class="sc">-</span> erro_inv_unid) <span class="sc">*</span> area_fazenda, <span class="dv">2</span> )</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>prod2_sup <span class="ot">&lt;-</span> <span class="fu">round</span>(( vmed <span class="sc">+</span> erro_inv_unid) <span class="sc">*</span> area_fazenda, <span class="dv">2</span> )</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>prod2_media <span class="ot">&lt;-</span> <span class="fu">round</span>( vmed <span class="sc">*</span> area_fazenda, <span class="dv">0</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>De acordo com os dados obtidos no processamento do inventário, pode-se esperar uma produção média do produto 2 de 108568m³, com um intervalo de confiança de 105160m³ a 111975m³. Sendo o erro percentual amostral de 3.14%.</p>
@@ -871,26 +854,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>erro_inv_unid <span class="ot">&lt;-</span> <span class="fu">qt</span>( <span class="fl">0.975</span>, n <span class="sc">-</span> <span class="dv">1</span> ) <span class="sc">*</span> erro_padrao_media </span>
 <span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="co">#erro percentual</span></span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>erro_inv_perc <span class="ot">&lt;-</span> erro_inv_unid <span class="sc">/</span> vmed <span class="sc">*</span> <span class="dv">100</span> </span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>erro_inv_perc_prod3 <span class="ot">&lt;-</span> erro_inv_unid <span class="sc">/</span> vmed <span class="sc">*</span> <span class="dv">100</span> </span>
 <span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="co">#Intervalo de confiança em m³/ha</span></span>
 <span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round( vmed - erro_inv_unid, 2 )," a ",round( vmed + erro_inv_unid, 2 ),</span></span>
 <span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/ha com 95% de confiança para volume total com casca", sep = "" ) )</span></span>
 <span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a><span class="co">#em m³/povoamento</span></span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(paste(round((vmed-erro_inv_unid)*area_fazenda,2),</span></span>
-<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="co">#           " a ",</span></span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co">#           round((vmed+erro_inv_unid)*area_fazenda,2),</span></span>
-<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a><span class="co">#           "m³/fazenda com 95% de confiança (volume total com casca da população)", sep = "" ) )</span></span>
-<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a><span class="co">#round( vmed * area_fazenda, 0 )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>prod3_inf <span class="ot">&lt;-</span> <span class="fu">round</span>(( vmed <span class="sc">-</span> erro_inv_unid) <span class="sc">*</span> area_fazenda, <span class="dv">2</span> )</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>prod3_sup <span class="ot">&lt;-</span> <span class="fu">round</span>(( vmed <span class="sc">+</span> erro_inv_unid) <span class="sc">*</span> area_fazenda, <span class="dv">2</span> )</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>prod3_media <span class="ot">&lt;-</span> <span class="fu">round</span>( vmed <span class="sc">*</span> area_fazenda, <span class="dv">0</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>De acordo com os dados obtidos no processamento do inventário, pode-se esperar uma produção média do produto 3 de 116896m³, com um intervalo de confiança de 113425m³ a 120368m³. Com erro percentual amostral de 2.97%.</p>
+<p>De acordo com os dados obtidos no processamento do inventário, pode-se esperar uma produção média do produto 3 de 116896m³, com um intervalo de confiança de 113424m³ a 120367m³. Sendo o erro percentual amostral de 2.97%.</p>
 </section>
 </section>
 <section id="conclusão" class="level1" data-number="7">
