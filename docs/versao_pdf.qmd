@@ -11,7 +11,7 @@ format:
     theme: lux
     toc: true
     toc-title: Sumário
-    table-title: Tabela
+    crossref-tbl-title: Tabela
     number-sections: true
 editor_options: 
   markdown: 
@@ -694,8 +694,8 @@ prod1_media <- round( vmed * area_fazenda, 0 )
 ```
 
 De acordo com os dados obtidos no processamento do inventário, pode-se
-esperar uma produção média do produto 1 de `r as.integer(prod1_media)`m³, com um
-intervalo de confiança de `r as.integer(prod1_inf)`m³ a `r as.integer(prod1_sup)`m³. Sendo o
+esperar uma produção média do produto 1 de `r format( prod1_media, scientific = FALSE )`m³, com um
+intervalo de confiança de `r format( prod1_inf, scientific = FALSE )`m³ a `r format( prod1_sup, scientific = FALSE )`m³. Sendo o
 erro percentual amostral de `r round( erro_inv_perc_prod1, 2 )`%.
 
 ## (b) Erro percentual amostral e intervalo de confiança do volume do produto 2 (com casca) para a população.
@@ -751,8 +751,8 @@ prod2_media <- round( vmed * area_fazenda, 0 )
 ```
 
 De acordo com os dados obtidos no processamento do inventário, pode-se
-esperar uma produção média do produto 2 de `r as.integer(prod2_media)`m³, com um
-intervalo de confiança de `r as.integer(prod2_inf)`m³ a `r as.integer(prod2_sup)`m³. Sendo o
+esperar uma produção média do produto 2 de `r format( prod2_media, scientific = FALSE )`m³, com um
+intervalo de confiança de `r format( prod2_inf, scientific = FALSE )`m³ a `r format( prod2_sup, scientific = FALSE )`m³. Sendo o
 erro percentual amostral de `r round( erro_inv_perc_prod2, 2 )`%.
 
 ## (c) Erro percentual amostral e intervalo de confiança do volume total com casca para a população.
@@ -807,8 +807,8 @@ prod3_media <- round( vmed * area_fazenda, 0 )
 ```
 
 De acordo com os dados obtidos no processamento do inventário, pode-se
-esperar uma produção média do produto 3 de `r as.integer(prod3_media, 2)`m³, com um
-intervalo de confiança de `r as.integer(prod3_inf)`m³ a `r as.integer(prod3_sup)`m³. Sendo o
+esperar uma produção média do produto 3 de `r format( prod3_media, scientific = FALSE )`m³, com um
+intervalo de confiança de `r format( prod3_inf, scientific = FALSE )`m³ a `r format( prod3_sup, scientific = FALSE )`m³. Sendo o
 erro percentual amostral de `r round( erro_inv_perc_prod3, 2 )`%.
 
 # Conclusão
